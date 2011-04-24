@@ -12,14 +12,14 @@
 # Params:
 # train - a sample x feature observation count matrix
 # envs - a factor or character vector indicating the sample environments
-# maxdepth - if present, all samples with > maxdepth sequences are rarified
+# maxdepth - if not NULL, all samples with > maxdepth sequences are rarified
 #
 # Value: 
 # Returns an object of class "sourcetracker". This is a list containing:
 # sources - matrix of the total counts of each taxon in each environment
 # train - a copy of the input training data
 # envs - a copy of the input environment vector
-"sourcetracker" <- function(train, envs, maxdepth=NULL){
+"sourcetracker" <- function(train, envs, maxdepth=1000){
     envs <- factor(envs)
     train.envs <- levels(envs)
     
@@ -67,7 +67,7 @@
 # beta - prior counts of test sequences in each environment,
 #   relative to the number of sequences in a given test sample.
 #   Higher values cause a smoother distribution over source environments.
-# maxdepth - if present, all test samples with > maxdepth sequences are rarified
+# maxdepth - if not NULL, all test samples with > maxdepth sequences are rarified
 # verbosity - if > 0, print progress updates while running
 #
 # Value: A list containing:
@@ -78,8 +78,8 @@
 # train.envs - the names of the source environments
 # samplenames - the names of the test samples
 "predict.sourcetracker" <- function(stobj, test=NULL, 
-            burnin=25, nrestarts=100, ndraws.per.restart=1, delay=10,
-            alpha1=0.0001, alpha2=0.1, beta=0.0001, maxdepth=NULL,
+            burnin=25, nrestarts=10, ndraws.per.restart=1, delay=10,
+            alpha1=0.0001, alpha2=0.1, beta=0.0001, maxdepth=1000,
 			verbosity=1){
 
     if(!is.null(test)){
@@ -107,7 +107,7 @@
         for(i in 1:N){
             stobj.i <- sourcetracker(train[-i,], envs[-i], maxdepth=maxdepth)
             sources <- stobj.i$sources
-            cat(sprintf('%3d: ',i))
+			if(verbosity >= 1) cat(sprintf('%3d: ',i))
             draws.i <- run.gibbs(sources, train[i,], V, T, 1,
                 burnin=burnin, nrestarts=nrestarts, 
                 ndraws.per.restart=ndraws.per.restart, delay=delay,
