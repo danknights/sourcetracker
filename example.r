@@ -13,7 +13,7 @@ otus <- t(read.table('data/otus.txt',sep='\t',header=T,row.names=1,check=F))
 otus <- otus[rownames(metadata),]
 
 # load SourceTracker package
-source('SourceTracker.r')
+source('src/SourceTracker.r')
 
 # train SourceTracker object on training data
 st <- sourcetracker(otus[train.ix,], envs[train.ix])
