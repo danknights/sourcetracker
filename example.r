@@ -25,7 +25,7 @@ results <- predict(st,otus[test.ix,])
 results.train <- predict(st)
 
 # plot results
-labels <- sprintf('%s_%s', envs,desc)
+labels <- sprintf('%s %s', envs,desc)
 plot(results, labels[test.ix], type='pie')
 plot(results, labels[test.ix], type='bar')
 plot(results, labels[test.ix], type='dist')
