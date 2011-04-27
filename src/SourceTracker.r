@@ -144,37 +144,55 @@
 # ... - Additional graphical parameters
 "plot.sourcetracker.fit" <- function(stresult, labels=NULL, 
         type=c('pie','bar','dist')[1], gridsize=NULL, env.colors=NULL, 
-        titlesize=NULL, indices=NULL, ...){
+        titlesize=NULL, indices=NULL, include.legend=FALSE, ...){
     if(is.null(env.colors)){
         #env.colors <- c('blue',rgb(0,128/255,0),'red',rgb(0,191/255,191/255), rgb(191/255,0,191/255))
-        env.colors <- c(rgb(63,82,162,m=255), 
-                        rgb(18,130,68,m=255),
-                        rgb(235,20,45,m=255),
-                        rgb(29,189,188,m=255),
-                        rgb(164,57,149,m=255))
+        env.colors <- std.env.colors
     }
             
     if(is.null(indices)) indices <- 1:dim(stresult$draws)[3]
     N <- length(indices)
     V <- dim(stresult$draws)[2]
 
+    if(include.legend) N <- N + 1
+
     if(!is.null(gridsize) && gridsize**2 < N)
         stop(sprintf('Please choose a gridsize of at least %d.',ceiling(sqrt(N))))
         
     if(is.null(labels)) labels <- stresult[['samplenames']]
     if(is.null(gridsize)) gridsize <- ceiling(sqrt(N))
-    if(is.null(titlesize)) titlesize <- .8/log10(gridsize)
+    if(is.null(titlesize)){
+        if(gridsize > 1){
+            titlesize <- .8/log10(gridsize)
+        } else {
+            titlesize=1
+        }
+    } 
 
     ngridrows <- ceiling(N / gridsize)
     par(mfrow=c(ngridrows,gridsize))
     par(oma=c(1,1,1,1), mar=c(0,0,titlesize,0))
 
+    # legend will occupy one full plot in the upper left
+    if(include.legend){
+        plot(0,0,xlim=c(0,1), ylim=c(0,1), type='n', axes=FALSE)
+        leg.cex <- 0.1
+        leg <- legend('topleft',stresult$train.envs, fill=env.colors, bg='white', cex=leg.cex, plot=FALSE)
+        maxdim <- max(leg$rect$w, leg$rect$h)
+
+        # resize legend to be just big enough to fill the plot (80%), or to have maximum text size 2
+        while(maxdim <.8 && leg.cex <= 2){
+            leg.cex <- leg.cex + 0.01
+            leg <- legend('topleft',stresult$train.envs, fill=env.colors, bg='white', cex=leg.cex, plot=FALSE)
+            maxdim <- max(leg$rect$w, leg$rect$h)
+        }
+        leg <- legend('topleft',stresult$train.envs, fill=env.colors, bg='white', cex=leg.cex)
+    }
+
     if(type=='pie') plot.sourcetracker.pie(stresult, labels, gridsize, env.colors, titlesize, indices=indices, ...)
     if(type=='bar') plot.sourcetracker.bar(stresult, labels, gridsize, env.colors, titlesize, indices=indices, ...)
     if(type=='dist') plot.sourcetracker.dist(stresult, labels, gridsize, env.colors, titlesize, indices=indices, ...)
 }
-
-
 
 
 ######### Internal function below ####################
@@ -293,7 +311,6 @@
 
 # Internal SourceTracker function to perform rarefaction analysis
 "rarefy" <- function(x,maxdepth){
-    print('hi')
     if(!is.element(class(x), c('matrix', 'data.frame','array')))
         x <- matrix(x,nrow=1)
     nr <- nrow(x)
@@ -322,7 +339,11 @@
 "plot.sourcetracker.bar" <- function(stresult, labels    , 
         gridsize, env.colors, titlesize, indices, ...){
     V <- length(stresult$train.envs)
-    par(mar=c(0,.5,1,.5))
+    # add extra space at top for title
+    new.margins <- par('mar')
+    new.margins[3] <- max(.5, new.margins[3] * 1.5)
+    new.margins[2] <- .25 * titlesize
+    par(mar=new.margins)
     for(i in indices){
         props <- apply(matrix(stresult$draws[,,i], ncol=V),2,mean)
         prop_devs <- apply(matrix(stresult$draws[,,i], ncol=V),2,sd)
@@ -331,28 +352,33 @@
                 ylim=c(0,1.5), ...)
         sourcetracker.error.bars(centers, props, prop_devs)
         for(j in 1:4)  axis(j, at=c(-100,100),labels=FALSE)
-
     }
 }
 
 # Internal SourceTracker function to plot distribution plots
 "plot.sourcetracker.dist" <- function(stresult, labels, 
-        gridsize, env.colors, titlesize, indices, ...){
+        gridsize, env.colors, titlesize, indices, sortmethod=c('divergence', 'multilevel')[1], ...){
     # stop conditions
     if(dim(stresult$draws)[1] < 2)
         stop('Distribution plots require more than one draw.')
     V <- length(stresult$train.envs)
     for(i in indices){
         x <- stresult$draws[,,i]
-        
-        # sort by size of column
-        sortby.ix <- sort(colMeans(x),index=T)$ix
-        for(j in 1:ncol(x)){
-            ix <- sort(x[,sortby.ix[j]],index=T)$ix
+        rownames(x) <- 1:nrow(x)
+        if(sortmethod=='multilevel'){
+            # sort by size of column
+            sortby.ix <- sort(colMeans(x),index=T, dec=T)$ix
+            x <- matrix(x, ncol=V)
+            ix <- sortmatrix(x[,sortby.ix])
+            x <- x[ix,]
+        } else {
+            ix <- cmdscale(jsdmatrix(x),k=1)
+            ix <- sort(ix,index=T)$ix
             x <- x[ix,]
         }
+        
         centers <- barplot(t(x), beside=FALSE, col=env.colors,
-                space=-.4, border=NA, axes=FALSE, axisnames=FALSE,
+                space=0, border=NA, axes=FALSE, axisnames=FALSE,
                 main=labels[i],cex.main=titlesize,
                 ylim=c(-.05,1.05), ...)
         bounds <- c(0, min(centers)-.5, 1, max(centers)+.5)
@@ -377,3 +403,51 @@
     segments(x - barw, upper, x + barw, upper, lwd=1.5, ...)
     segments(x - barw, lower, x + barw, lower, lwd=1.5, ...)
 }
+
+# sorts a matrix by first column, breaks ties by the 2nd, 3rd, etc. columns
+# returns row indices
+"sortmatrix" <- function(x){
+    # sort by last column, then 2nd-to-last, etc.
+    ix <- 1:nrow(x)
+    for(j in ncol(x):1){
+        ixj <- sort(x[ix,j], index=T)$ix
+        ix <- ix[ixj]
+    }
+    return(ix)
+}
+
+"jsdmatrix" <- function(x){
+    d <- matrix(0,nrow=nrow(x),ncol=nrow(x))
+    for(i in 1:(nrow(x)-1)){
+        for(j in (i+1):nrow(x)){
+            d[i,j] <- jsd(x[i,], x[j,])
+            d[j,i] <- d[i,j]
+        }
+    }
+    return(d)
+}
+
+"jsd" <- function(p,q){
+    m <- (p + q)/2
+    return((kld(p,m) + kld(q,m))/2)
+}
+
+"kld" <- function(p,q){
+    nonzero <- p>0 & q>0
+    return(sum(p[nonzero] * log(p[nonzero]/q[nonzero])))    
+}
+
+"figlegend" <- function(){
+}
+
+
+# global definition of standard env colors
+std.env.colors <- c(rgb(63,82,162,m=255), 
+                rgb(18,130,68,m=255),
+                rgb(235,20,45,m=255),
+                rgb(29,189,188,m=255),
+                rgb(164,57,149,m=255),
+                '#885588','#6B78B4','#CC6666','#663333',
+                '#47697E','#5B7444','#79BEDB','#A3C586',
+                '#FFCC33','#e93E4A','#B1BDCD','#266A2E',
+                '#FCF1D1','#660F57','#272B20','#003366')
