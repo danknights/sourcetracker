@@ -32,3 +32,6 @@ plot(results, labels[test.ix], type='dist')
 plot(results.train, labels[train.ix], type='pie')
 plot(results.train, labels[train.ix], type='bar')
 plot(results.train, labels[train.ix], type='dist')
+
+# plot results with legend
+plot(results, labels[test.ix], type='pie', include.legend=TRUE)
