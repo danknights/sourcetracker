@@ -12,29 +12,38 @@
 # Params:
 # train - a sample x feature observation count matrix
 # envs - a factor or character vector indicating the sample environments
-# maxdepth - if not NULL, all samples with > maxdepth sequences are rarified
+# rarefaction_depth - if not NULL, all samples with > rarefaction_depth sequences are rarified;
+#            This decreases the influence of high-coverage source samples.
 #
 # Value: 
 # Returns an object of class "sourcetracker". This is a list containing:
 # sources - matrix of the total counts of each taxon in each environment
 # train - a copy of the input training data
 # envs - a copy of the input environment vector
-"sourcetracker" <- function(train, envs, maxdepth=NULL){
+"sourcetracker" <- function(train, envs, rarefaction_depth=1000){
+    train <- as.matrix(train)
+
+    # enforce integer data
+    if(sum(as.integer(train) != as.numeric(train)) > 0){
+        stop('Data must be integral. Consider using "ceiling(datatable)" or ceiling(1000*datatable) to convert floating-point data to integers.')
+    }
+    
     envs <- factor(envs)
-    train.envs <- levels(envs)
+    train.envs <- sort(unique(levels(envs)))
+    
     
     # rarefy samples above maxdepth if requested
-    if(!is.null(maxdepth))    train <- rarefy(train, maxdepth)
+    if(!is.null(rarefaction_depth)) train <- rarefy(train, rarefaction_depth)
     
-    # get source environment counts, smoothed by alpha * mean source env sum
+    # get source environment counts
     # sources is nenvs X ntaxa
-    sources <- t(sapply(split(data.frame(train), envs), colSums))
-    envsums <- rowSums(sources)
+    sources <- t(sapply(split(data.frame(train), envs), colSums))    
+    
+    # add an empty row for "Unknown"
     sources <- rbind(sources, rep(0,ncol(train)))
-    #sources <- sweep(sources, 1, alpha1 * envsums, '+')
-    #sources <- rbind(sources, rep(alpha2*mean(envsums),ncol(train)))
     rownames(sources) <- c(train.envs,"Unknown")
     colnames(sources) <- colnames(train)
+    sources <- as.matrix(sources)
     
     ret <- list(sources=sources, train=train, envs=envs)
     class(ret) <- "sourcetracker"
@@ -50,70 +59,108 @@
 # Params:
 # stobj - output from function "sourcetracker"
 # test - test data, a matrix of sample x feature counts
-#     if test is NULL, performs leave-one-out predictions of the training
+#   if test is NULL, performs leave-one-out predictions of the training
 #   samples
 # burnin - number of "burn-in" passes for Gibbs sampling
 # nrestarts - number of times to restart the Gibbs sampling process
 # n.draws.per.restart - number of Gibbs draws to collect per restart
 # delay - number of passes between draws (ignored if n.draws.per.restart is 1)
 # alpha1 - prior counts of each species in the training environments,
-#     relative to the total number of sequences per training environment.
 #   Higher values decrease the trust in the training data, and make the 
-#   source environment distributions over taxa smoother
+#   source environment distributions over taxa smoother. By default, this is
+#   set to 1e-3, which indicates reasonably high trust in all source environments, even
+#   those with few training sequences. This is useful when only a small number 
+#   of biological samples are available from a source environment.
+#   A more conservative value would be 0.001 or 0.01.
 # alpha2 - prior counts of each species in the Unknown environment,
-#   relative to the number of sequences in a given test sample.
 #   Higher values make the Unknown environment smoother and less prone to
-#   over-fitting a given training sample. 
-# beta - prior counts of test sequences in each environment,
-#   relative to the number of sequences in a given test sample.
+#   over-fitting a given training sample. Default is 1e-3.
+# beta - prior counts of test sequences in each environment.
 #   Higher values cause a smoother distribution over source environments.
-# maxdepth - if not NULL, all test samples with > maxdepth sequences are rarified
+#   Default is 1e-2.
+# rarefaction_depth - if not NULL, all test samples with > maxdepth sequences are rarified
 # verbosity - if > 0, print progress updates while running
+# full.results - return full draws from gibbs sampling (all assignments of all taxa)
 #
 # Value: A list containing:
 # draws - an array of dimension (ndraws X nenvironments X nsamples),
 #     containing all draws from gibbs sampling
 # proportions - the mean proportions over all Gibbs draws for each sample
-# proportions - standard deviation of the mean proportions for each sample
+# proportions_sd - standard deviation of the mean proportions for each sample
 # train.envs - the names of the source environments
 # samplenames - the names of the test samples
 "predict.sourcetracker" <- function(stobj, test=NULL, 
-            burnin=25, nrestarts=10, ndraws.per.restart=1, delay=10,
-            alpha1=0.0001, alpha2=0.1, beta=0.0001, maxdepth=NULL,
-            verbosity=1){
+            burnin=100, nrestarts=10, ndraws.per.restart=1, delay=10,
+            alpha1=1e-3, alpha2=1e-3, beta=1e-2, rarefaction_depth=1000,
+            verbosity=1, full.results=FALSE){
 
     if(!is.null(test)){
+        # if test is numeric, cast as a row matrix
+        if(class(test) == "numeric" || class(test) == "integer"){
+            test <- matrix(test, nrow=1)
+        } else {
+            test <- as.matrix(test)
+        }
+        if(sum(as.integer(test) != as.numeric(test)) > 0){
+            stop('Data must be integral. Consider using "ceiling(datatable)" or ceiling(1000*datatable) to convert floating-point data to integers.')
+        }
         sources <- stobj$sources
+        if(verbosity>=1) {
+            cat(rep(' ',nrestarts * ndraws.per.restart+1),sep='')
+            cat(rep(' ',27),sep='')
+            cat(sprintf('%11s',substr(rownames(sources),1,10)),sep='\t'); cat('\n')
+        }
         T <- ncol(sources) # number of taxa
         V <- nrow(sources) # number of source envs
-        N <- nrow(test) # number of sink samples
-        
-        
+        if(is.null(dim(test))) N <- 1
+        else N <- nrow(test) # number of sink samples
+
+        samplenames <- rownames(test)
         draws <- run.gibbs(sources, test, V, T, N,
                 burnin=burnin, nrestarts=nrestarts, 
                 ndraws.per.restart=ndraws.per.restart, delay=delay,
-                alpha1=alpha1, alpha2=alpha2, beta=beta, maxdepth=maxdepth,
-                verbosity=verbosity)
-    } else {  # leave-one-out 
-    
-        train <- stobj$train
+                alpha1=alpha1, alpha2=alpha2, beta=beta, maxdepth=rarefaction_depth,
+                verbosity=verbosity, full.results=full.results)
+        if(full.results) {
+            full.draws <- draws$full.draws
+            draws <- draws$draws
+        }
+    } else {  # leave-one-out    
+        samplenames <- rownames(stobj$train)
         envs <- stobj$envs
         
-        T <- ncol(train) # number of taxa
+        T <- ncol(stobj$train) # number of taxa
         V <- nrow(stobj$sources) # number of source envs
-        N <- nrow(train) # number of sink samples
+        N <- nrow(stobj$train) # number of sink samples
         ndraws <- nrestarts * ndraws.per.restart # total number of draws
-        draws <- array(dim=c(ndraws, V, N))
+        draws <- array(0,dim=c(ndraws, V, N))
+        full.draws <- array(0,dim=c(ndraws, V, T, N))
         for(i in (1:N)){
-            stobj.i <- sourcetracker(train[-i,], envs[-i], maxdepth=maxdepth)
+            stobj.i <- sourcetracker(stobj$train[-i,], envs[-i], rarefaction_depth=rarefaction_depth)
             sources <- stobj.i$sources
-            if(verbosity >= 1) cat(sprintf('%3d: ',i))
-            draws.i <- run.gibbs(sources, train[i,], V, T, 1,
+            V.i <- nrow(sources) # number of source envs (might be missing one if there's only one sample from this env)
+            draws.i <- run.gibbs(sources, stobj$train[i,], V.i, T, 1,
                 burnin=burnin, nrestarts=nrestarts, 
                 ndraws.per.restart=ndraws.per.restart, delay=delay,
-                alpha1=alpha1, alpha2=alpha2, beta=beta, maxdepth=maxdepth,
-                verbosity=verbosity)
-            draws[,,i] <- drop(draws.i)
+                alpha1=alpha1, alpha2=alpha2, beta=beta, maxdepth=rarefaction_depth,
+                verbosity=verbosity, printing.index=i, printing.total=N, full.results=full.results)
+            if(full.results){
+                full.draws.i <- draws.i$full.draws
+                draws.i <- draws.i$draws
+            }
+            # if(verbosity >= 1) cat(sprintf('%3d of %d: ',i,N))
+            # handle case where there are no other samples from this env
+            if(sum(envs[-i] == envs[i])==0){
+                draws[,-which(rownames(stobj$sources)==envs[i]),i] <- drop(draws.i)
+                if(full.results){
+                    full.draws[,-which(rownames(stobj$sources)==envs[i]),,i] <- drop(full.draws.i)
+                }
+            } else {
+                draws[,,i] <- drop(draws.i)
+                if(full.results){
+                    full.draws[,,,i] <- drop(full.draws.i)
+                }
+            }
         }
     }
 
@@ -123,10 +170,15 @@
         proportions[i,] <- apply(matrix(draws[,,i], ncol=V),2,mean)
         proportions_sd[i,] <- apply(matrix(draws[,,i], ncol=V),2,sd)
     }
+    rownames(proportions) <- samplenames
+    colnames(proportions) <- rownames(stobj$sources)
+    rownames(proportions_sd) <- samplenames
+    colnames(proportions_sd) <- rownames(stobj$sources)
     
     res <- list(draws=draws, proportions=proportions,
                 proportions_sd=proportions_sd,
-                train.envs=rownames(sources), samplenames=rownames(test))
+                train.envs=rownames(sources), samplenames=samplenames)
+    if(full.results) res$full.results <- full.draws
     class(res) <- "sourcetracker.fit"
     return(invisible(res))
 }
@@ -146,10 +198,11 @@
         type=c('pie','bar','dist')[1], gridsize=NULL, env.colors=NULL, 
         titlesize=NULL, indices=NULL, include.legend=FALSE, ...){
     if(is.null(env.colors)){
-        #env.colors <- c('blue',rgb(0,128/255,0),'red',rgb(0,191/255,191/255), rgb(191/255,0,191/255))
         env.colors <- std.env.colors
+        # always set 'Unknown' to grey
+        env.colors[stresult$train.envs=='Unknown'] <- std.env.colors[length(std.env.colors)]
     }
-            
+    
     if(is.null(indices)) indices <- 1:dim(stresult$draws)[3]
     N <- length(indices)
     V <- dim(stresult$draws)[2]
@@ -163,7 +216,7 @@
     if(is.null(gridsize)) gridsize <- ceiling(sqrt(N))
     if(is.null(titlesize)){
         if(gridsize > 1){
-            titlesize <- .8/log10(gridsize)
+            titlesize <- .7/log10(gridsize)
         } else {
             titlesize=1
         }
@@ -186,7 +239,7 @@
             leg <- legend('topleft',stresult$train.envs, fill=env.colors, bg='white', cex=leg.cex, plot=FALSE)
             maxdim <- max(leg$rect$w, leg$rect$h)
         }
-        leg <- legend('topleft',stresult$train.envs, fill=env.colors, bg='white', cex=leg.cex)
+        leg <- legend('topleft',stresult$train.envs, fill=env.colors, bg='white', cex=leg.cex, border=NA)
     }
 
     if(type=='pie') plot.sourcetracker.pie(stresult, labels, gridsize, env.colors, titlesize, indices=indices, ...)
@@ -195,21 +248,30 @@
 }
 
 
-######### Internal function below ####################
+######### Internal functions below ####################
 
 
 # Internal SourceTracker function to run Gibbs sampling
+# total.n is used to supply the total number of samples in leave-one-out
+# predictions for printing status updates
+# full.results returns the source env. x taxon counts for every draw
 "run.gibbs" <- function(sources, test, V, T, N,
-        burnin=25, nrestarts=100, ndraws.per.restart=1, delay=10,
-        alpha1=0.1, alpha2=0.1, beta=0.0001, maxdepth=NULL,
-        verbosity=1){
+        burnin=100, nrestarts=10, ndraws.per.restart=10, delay=10,
+        alpha1=1e-3, alpha2=1e-3, beta=1e-2, maxdepth=NULL,
+        verbosity=1, printing.index=NULL, printing.total=NULL,
+        full.results=FALSE){
 
+    if(is.null(printing.total)) printing.total <- N
+    
     train.envs <- rownames(sources)
     ndraws <- nrestarts * ndraws.per.restart # total number of draws
     npasses <- burnin + (ndraws.per.restart-1) * delay + 1 # passes per restart
 
     # draws will hold all draws (ndraws x V x N)
     draws <- array(dim=c(ndraws, V, N))
+    if(full.results){
+        full.draws <- array(dim=c(ndraws, V, T, N))
+    }
     
     # rarefy samples above maxdepth if requested
     if(!is.null(maxdepth))    test <- rarefy(test, maxdepth)
@@ -220,30 +282,35 @@
     
     # store original prior counts for "Unknown"
     unknown.prior <- sources[V,]
+    # sources[-V,] <- sweep(sources[-V,],1,alpha1 * rowSums(sources[-V,]),'+')  # add relative alpha prior counts
+    sources[-V,] <- sources[-V,] + alpha1 # add absolute alpha prior counts
     
     # for each sink sample
     for(i in 1:N){
         sink <- test[i,]
         D <- sum(sink) # sink sample depth
-        
         # precalculate denominator for Pr(env in sample)
-        p_v_denominator = max(1,(D-1) + V*beta*D)
+        p_v_denominator = max(1,(D-1) + V*beta)
         
         # get taxon index for each sequence
         tax.cumsum <- cumsum(sink)
         tax.ix <- sapply(1:D,function(x) min(which(x<=tax.cumsum)))
-
+        
         drawcount <- 1 # keeps running count of draws for this sample
         # for each restart
         for(j in 1:nrestarts){
-            
+            if(verbosity>=1) cat('.')
+            options(warn=-1)
             z <- sample(V,D,replace=TRUE) # random env assignments
+            options(warn=0)
+
             sources[V,] <- unknown.prior # prior counts of taxa in Unknown
-            sources[-V,] <- sources[-V,] + alpha1 * D # add relative alpha prior counts
             sources[V,] <- sources[V,] + alpha2 * D # add relative alpha prior counts
             
             # tally counts in envs
-            envcounts <- rep(beta * D, V)
+            # count all assignments to the "other" environment
+            # other environments don't get incremented because they are fixed from training data
+            envcounts <- rep(beta, V)
             for(ix in 1:D){
                 if(z[ix] == V)    sources[V,tax.ix[ix]] <- sources[V,tax.ix[ix]] + 1
                 envcounts[z[ix]] <- envcounts[z[ix]] + 1
@@ -251,7 +318,9 @@
 
             for(rep in 1:npasses){
                 rand.ix <- sample(D) # random order for traversing sequence
-
+                # temporary: not random
+                # rand.ix <- 1:D
+                
                 cnt <- 0
                 for(ix in rand.ix){
                     taxon <- tax.ix[ix]
@@ -265,9 +334,6 @@
                     p_v <- envcounts/p_v_denominator# Pr(env in sample)
                     
                     
-                    # re-sample this sequence's env assignment
-                    z[ix] <- sample(1:V, prob=p_tv * p_v, size=1)
-
                     if(1==0){
                         cat(sprintf('otu index %d:\n', taxon))
                         cat(sprintf('%.5f\t%.5f\n',p_tv, p_v))
@@ -275,39 +341,185 @@
                         cat(sprintf('%.5f',sources[,taxon]),sep='\t')
                         
                         cat('\n\n')
-                        if(cnt > 10    ) stop()
+                        # if(cnt > 10   ) stop()
                         cnt <- cnt + 1
                     }
+                    # re-sample this sequence's env assignment
+                    z[ix] <- sample(1:V, prob=p_tv * p_v, size=1)
+                    # cat(sprintf('OTU ID %d: %d\n', taxon, z[ix]))
                     # replace this sequence in all counts
                     envcounts[z[ix]] <- envcounts[z[ix]] + 1
-                    if(z[ix] == V)    sources[V,taxon] <- sources[V,taxon] + 1
-                    
 
+                    # if this sequence is assigned to "other", increase count
+                    if(z[ix] == V)    sources[V,taxon] <- sources[V,taxon] + 1
                 }
                 # take sample
                 if(rep > burnin && (((rep-burnin) %% delay)==1 || delay<=1)){
                         
                     # save current mixing proportions
-                    draws[drawcount,,i] <- round((envcounts - beta*D) / D,7)
+                    draws[drawcount,,i] <- round((envcounts - beta) / D,7)
                     draws[drawcount,,i] <- draws[drawcount,,i] / sum(draws[drawcount,,i])
-                     drawcount <- drawcount + 1
+                    
+                    # save full taxon-source assignments if requested
+                    if(full.results){
+                        # for each environment, save taxon counts
+                        for(j in 1:V){
+                            full.draws[drawcount,j,,i] <- sapply(1:T,function(x) sum(tax.ix[z==j]==x))
+                        }
+                    }
+                    drawcount <- drawcount + 1
                 }
             }
-            
-            sources[-V,] <- sources[-V,] - alpha1 * D # add relative alpha prior counts
-
         }
+
         if(verbosity>=1){
-            cat(sprintf('%d of %d depth=%4d, ', i, N, D))
+            if(is.null(printing.index)){
+                cat(sprintf('%4d of %4d, depth=%5d: ', i, printing.total, D))
+            } else {
+                cat(sprintf('%4d of %4d, depth=%5d: ', printing.index, printing.total, D))
+            }
             props <- colMeans(matrix(draws[,,i],ncol=V))
             prop_devs <- apply(matrix(draws[,,i], ncol=V), 2, sd)
+            cat(' ')
             cat(sprintf('%.2f (%.2f)', props, prop_devs),sep='\t')
             cat('\n')
         }
     }
-    
-    return(draws=draws)
+    if(full.results){
+        return(list(draws=draws, full.draws=full.draws))
+    } else {
+        return(draws=draws)
+    }
 }
+
+
+# tries all values of alpha1 and alpha2 for best r-squared
+# if individual.samples, tries to predict mixtures of single samples
+# instead of mixtures of the environment means
+# ntrials is the number of simulated samples per fit.
+# nrepeats is the number of times to repeat the entire experiment at each alpha value
+# verbosity > 1 means inner loop will print
+"tune.st" <- function(otus, envs, individual.samples=TRUE, ntrials=10, nrepeats=1,
+            rarefaction_depth=1000, alpha1=10**(-4:-1), alpha2=10**(-4:-1), verbosity=0, ...){
+    allres <- list()
+    alphas <- expand.grid(alpha1, alpha2)
+    colnames(alphas) <- c('alpha1','alpha2')
+    r2 <- matrix(0, nrow=nrow(alphas), ncol=nrepeats)
+    for(j in 1:nrepeats){
+        cat(sprintf('* Outer loop %d of %d\n',j,nrepeats))
+        thisres <- list()
+        for(i in 1:nrow(alphas)){
+            cat(sprintf('Loop %d of %d, alpha1=%f, alpha2=%f ',i,nrow(alphas),alphas[i,1], alphas[i,2]))
+            if(verbosity > 2) cat('\n')
+            thisres[[i]] <- eval.fit(otus, envs, individual.samples=individual.samples,
+                                    ntrials=ntrials, rarefaction_depth=rarefaction_depth,
+                                    alpha1=alphas[i,1], alpha2=alphas[i,2], verbosity=verbosity-1, ...)
+            r2[i,j] <- thisres[[i]]$r2
+            if(verbosity > 0) cat(sprintf('R-squared = %.3f\n',r2[i,j]))
+        }
+        allres[[j]] <- thisres
+    }
+    best.r2 <- max(rowMeans(r2))
+    best.alpha1 <- alphas[which.max(rowMeans(r2)),1]
+    best.alpha2 <- alphas[which.max(rowMeans(r2)),2]
+    return(list(alphas=alphas, r2=r2, best.r2=best.r2, 
+                best.alpha1=best.alpha1, best.alpha2=best.alpha2, results=allres))
+}
+
+# train SourceTracker object on training data
+# ... are additional params to pass to sourcetracker predict object
+"eval.fit" <- function(otus, envs, individual.samples=FALSE,
+            ntrials=10, rarefaction_depth=1000, verbosity=1, ...){
+    train.envs <- sort(unique(envs))
+    V <- length(train.envs)
+    env.sizes <- table(envs)
+    
+    # make sure each pair of envs gets picked
+    # build up all pairs of samples, each column is a pair
+    # each source env gets to be first and second sample once
+    # pairs <- expand.grid(1:V,1:V)
+    # pairs <- pairs[pairs[,1]!=pairs[,2],]
+    # make nreps pairs randomly
+    pairs <- NULL
+    for(i in 1:ntrials){
+        pairs <- rbind(pairs, sample(V,size=2))
+    }
+    
+    mixtures <- runif(ntrials)
+    y <- matrix(0,nrow=ntrials, ncol=V+1)
+    yhat <- matrix(0,nrow=ntrials, ncol=V+1)
+    yhat.sd <- matrix(0,nrow=ntrials, ncol=V+1)
+    colnames(y) <- c(as.character(train.envs),'Unknown')
+    colnames(yhat) <- c(as.character(train.envs),'Unknown')
+    newsamples <- NULL
+    allenvs <- NULL
+    for(i in 1:ntrials){
+        env1 <- pairs[i,1]
+        env2 <- pairs[i,2]
+        allenvs <- rbind(allenvs, c(env1, env2))
+        if(verbosity > 1){
+            cat(sprintf('%d of %d: %.2f*%s + %.2f*%s: \n',i,ntrials,mixtures[i], train.envs[env1],1-mixtures[i], train.envs[env2]))
+        } else if(verbosity > 0){
+            cat('.')
+        }
+
+        # all indices of each environment
+        env1.ix.all <- which(envs == train.envs[env1])
+        env2.ix.all <- which(envs == train.envs[env2])
+        
+        if(individual.samples){
+            # get one sample from each env
+            # cast as list so that sample doesn't misinterpret a length-1 vector
+            env1.ix <- sample(as.list(env1.ix.all),size=1)[[1]]
+            env2.ix <- sample(as.list(env2.ix.all),size=1)[[1]]
+            
+            # train sourcetracker, hold out entire second env. and first env. sample
+            # note: don't hold out first sample if that env has only one sample
+            if(length(env1.ix.all) == 1){
+                st <- sourcetracker(otus[-env2.ix.all,], envs[-env2.ix.all])
+            } else {
+                st <- sourcetracker(otus[-c(env1.ix,env2.ix.all),], envs[-c(env1.ix,env2.ix.all)])
+            }
+            
+            # make fake sample, weighted mixture of two source samples
+            s1 <- otus[env1.ix,]
+            s2 <- otus[env2.ix,]
+            
+        } else {
+            # train sourcetracker, hold out entire second env.
+            st <- sourcetracker(otus[-env2.ix.all,], envs[-env2.ix.all])
+            
+            # make fake sample as mixture of _environment_ means
+            s1 <- colSums(rarefy(otus[env1.ix.all,], maxdepth=1000))
+            s2 <- colSums(rarefy(otus[env2.ix.all,], maxdepth=1000))
+        }
+        
+        newsample <- mixtures[i] * s1/sum(s1) + (1-mixtures[i]) * s2/sum(s2)
+        newsample <- round(100000 * newsample)
+        newsample <- matrix(newsample, nrow=1)
+        newsample <- rarefy(newsample,maxdepth=rarefaction_depth)
+        newsamples <- rbind(newsamples, newsample)
+        y[i,env1] <- mixtures[i]
+        y[i,V+1] <- 1-mixtures[i]
+        
+
+        # test on fake sample
+        results <- predict(st, newsample, rarefaction_depth=rarefaction_depth, verbosity=verbosity-1, ...)
+        for(j in 1:ncol(results$proportions)){
+            whichenv <- which(colnames(yhat) == colnames(results$proportions)[j])
+            yhat[i,whichenv] <- results$proportions[,j]
+            yhat.sd[i,whichenv] <- results$proportions_sd[,j]
+        }
+    }
+
+    # calculate r2
+    sst <- sum((y[,-V] - mean(y[,-V]))**2)
+    sse <- sum((y[,-V] - yhat[,-V])**2)
+    r2 <- 1 - sse/sst
+
+    return(list(y=y,yhat=yhat,yhat.sd=yhat.sd,newsamples=newsamples, env.pairs=allenvs, train.envs=train.envs, r2=r2))
+}
+
 
 # Internal SourceTracker function to perform rarefaction analysis
 "rarefy" <- function(x,maxdepth){
@@ -318,7 +530,9 @@
 
     for(i in 1:nrow(x)){
         if(sum(x[i,]) > maxdepth){
+            options(warn=-1)
             s <- sample(nc, size=maxdepth, prob=x[i,], replace=T)
+            options(warn=0)
             x[i,] <- hist(s,breaks=seq(.5,nc+.5,1), plot=FALSE)$counts
         }
     }
@@ -378,7 +592,7 @@
         }
         
         centers <- barplot(t(x), beside=FALSE, col=env.colors,
-                space=0, border=NA, axes=FALSE, axisnames=FALSE,
+                space=-1/ncol(x), border=NA, axes=FALSE, axisnames=FALSE,
                 main=labels[i],cex.main=titlesize,
                 ylim=c(-.05,1.05), ...)
         bounds <- c(0, min(centers)-.5, 1, max(centers)+.5)
@@ -392,13 +606,18 @@
 
 # Internal SourceTracker function to plot error bars on a bar chart
 "sourcetracker.error.bars" <- function(x,centers,spread,...){
-    width = min(.01, .25/length(x))
+    width = .01
+    
     xlim <- range(x)
-    barw <- diff(xlim) * width * 4
+    barw <- diff(xlim) * width
     
     upper <- centers + spread
     lower <- centers - spread
-
+    keepix <- which(spread > 0)
+    x <- x[keepix]
+    upper <- upper[keepix]
+    lower <- lower[keepix]
+    
     segments(x, upper, x, lower, lwd=1.5, ...)
     segments(x - barw, upper, x + barw, upper, lwd=1.5, ...)
     segments(x - barw, lower, x + barw, lower, lwd=1.5, ...)
@@ -437,17 +656,28 @@
     return(sum(p[nonzero] * log(p[nonzero]/q[nonzero])))    
 }
 
-"figlegend" <- function(){
-}
-
-
 # global definition of standard env colors
-std.env.colors <- c(rgb(63,82,162,m=255), 
-                rgb(18,130,68,m=255),
-                rgb(235,20,45,m=255),
-                rgb(29,189,188,m=255),
-                rgb(164,57,149,m=255),
-                '#885588','#6B78B4','#CC6666','#663333',
-                '#47697E','#5B7444','#79BEDB','#A3C586',
-                '#FFCC33','#e93E4A','#B1BDCD','#266A2E',
-                '#FCF1D1','#660F57','#272B20','#003366')
+std.env.colors <- c(
+'#885588',
+'#CC6666',
+'#47697E',
+'#5B7444',
+'#79BEDB',
+'#663333',
+'#3F52A2',
+'#128244',
+'#e93E4A',
+'#1DBDBC',
+'#A43995',
+'#FFCC33',
+'#B1BDCD',
+'#A3C586',
+'#6B78B4',
+'#266A2E',
+'#FCF1D1',
+'#660F57',
+'#272B20',
+'#003366',
+'#656565'
+)
+
