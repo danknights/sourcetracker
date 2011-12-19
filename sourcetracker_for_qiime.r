@@ -91,7 +91,7 @@ predictfile <- arglist[['-f']]
 resultsfile <- arglist[['-R']]
 alpha1 <- as.numeric(arglist[['--alpha1']])
 alpha2 <- as.numeric(arglist[['--alpha2']])
-tune.alphas <- arglist[['tune_alphas']]
+tune.alphas <- arglist[['--tune_alphas']]
 if(rarefaction==0) rarefaction <- NULL
 
 # create output directory
@@ -161,6 +161,7 @@ if(!is.null(resultsfile)){
     # train SourceTracker object on training data
     st <- sourcetracker(otus[source.ix,], envs[source.ix], rarefaction_depth=rarefaction)
 
+    print(tune.alphas)
     # if tuning is requested, obtain alpha values by cross-validation
     if(tune.alphas){
         tune.res <- tune.st(otus[source.ix,], envs[source.ix], rarefaction_depth=1000, verbosity=2)
