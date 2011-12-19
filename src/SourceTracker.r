@@ -3,7 +3,7 @@
 # Contact: danknights@gmail.com
 # License: GPL
 # Copyright: Copyright 2011, Dan Knights
-
+# Version: 0.9.1 (Beta)
 
 # Function "sourcetracker"
 #
@@ -27,10 +27,8 @@
     if(sum(as.integer(train) != as.numeric(train)) > 0){
         stop('Data must be integral. Consider using "ceiling(datatable)" or ceiling(1000*datatable) to convert floating-point data to integers.')
     }
-    
     envs <- factor(envs)
     train.envs <- sort(unique(levels(envs)))
-    
     
     # rarefy samples above maxdepth if requested
     if(!is.null(rarefaction_depth)) train <- rarefy(train, rarefaction_depth)
@@ -137,7 +135,7 @@
         full.draws <- array(0,dim=c(ndraws, V, T, N))
         for(i in (1:N)){
             stobj.i <- sourcetracker(stobj$train[-i,], envs[-i], rarefaction_depth=rarefaction_depth)
-            sources <- stobj.i$sources
+            cat(i)
             V.i <- nrow(sources) # number of source envs (might be missing one if there's only one sample from this env)
             draws.i <- run.gibbs(sources, stobj$train[i,], V.i, T, 1,
                 burnin=burnin, nrestarts=nrestarts, 
@@ -399,8 +397,8 @@
 # ntrials is the number of simulated samples per fit.
 # nrepeats is the number of times to repeat the entire experiment at each alpha value
 # verbosity > 1 means inner loop will print
-"tune.st" <- function(otus, envs, individual.samples=TRUE, ntrials=10, nrepeats=1,
-            rarefaction_depth=1000, alpha1=10**(-4:-1), alpha2=10**(-4:-1), verbosity=0, ...){
+"tune.st" <- function(otus, envs, individual.samples=TRUE, ntrials=25, nrepeats=1,
+            rarefaction_depth=1000, alpha1=10**(-4:-2), alpha2=10**(-4:-2), verbosity=0, ...){
     allres <- list()
     alphas <- expand.grid(alpha1, alpha2)
     colnames(alphas) <- c('alpha1','alpha2')
@@ -429,7 +427,7 @@
 # train SourceTracker object on training data
 # ... are additional params to pass to sourcetracker predict object
 "eval.fit" <- function(otus, envs, individual.samples=FALSE,
-            ntrials=10, rarefaction_depth=1000, verbosity=1, ...){
+            ntrials=25, rarefaction_depth=1000, verbosity=1, ...){
     train.envs <- sort(unique(envs))
     V <- length(train.envs)
     env.sizes <- table(envs)
@@ -458,7 +456,7 @@
         env2 <- pairs[i,2]
         allenvs <- rbind(allenvs, c(env1, env2))
         if(verbosity > 1){
-            cat(sprintf('%d of %d: %.2f*%s + %.2f*%s: \n',i,ntrials,mixtures[i], train.envs[env1],1-mixtures[i], train.envs[env2]))
+           cat(sprintf('%d of %d: %.2f*%s + %.2f*%s: \n',i,ntrials,mixtures[i], train.envs[env1],1-mixtures[i], train.envs[env2]))
         } else if(verbosity > 0){
             cat('.')
         }
@@ -490,19 +488,18 @@
             st <- sourcetracker(otus[-env2.ix.all,], envs[-env2.ix.all])
             
             # make fake sample as mixture of _environment_ means
-            s1 <- colSums(rarefy(otus[env1.ix.all,], maxdepth=1000))
-            s2 <- colSums(rarefy(otus[env2.ix.all,], maxdepth=1000))
+            s1 <- colSums(rarefy(otus[env1.ix.all,], maxdepth=rarefaction_depth))
+            s2 <- colSums(rarefy(otus[env2.ix.all,], maxdepth=rarefaction_depth))
         }
         
         newsample <- mixtures[i] * s1/sum(s1) + (1-mixtures[i]) * s2/sum(s2)
         newsample <- round(100000 * newsample)
         newsample <- matrix(newsample, nrow=1)
-        newsample <- rarefy(newsample,maxdepth=rarefaction_depth)
+        newsample <- rarefy(newsample,maxdepth=ceiling(sum(s1+s2)/2))
         newsamples <- rbind(newsamples, newsample)
         y[i,env1] <- mixtures[i]
         y[i,V+1] <- 1-mixtures[i]
         
-
         # test on fake sample
         results <- predict(st, newsample, rarefaction_depth=rarefaction_depth, verbosity=verbosity-1, ...)
         for(j in 1:ncol(results$proportions)){
@@ -515,7 +512,7 @@
     # calculate r2
     sst <- sum((y[,-V] - mean(y[,-V]))**2)
     sse <- sum((y[,-V] - yhat[,-V])**2)
-    r2 <- 1 - sse/sst
+    r2 <- max(1 - sse/sst, 0)
 
     return(list(y=y,yhat=yhat,yhat.sd=yhat.sd,newsamples=newsamples, env.pairs=allenvs, train.envs=train.envs, r2=r2))
 }
@@ -523,6 +520,8 @@
 
 # Internal SourceTracker function to perform rarefaction analysis
 "rarefy" <- function(x,maxdepth){
+    if(is.null(maxdepth)) return(x)
+    
     if(!is.element(class(x), c('matrix', 'data.frame','array')))
         x <- matrix(x,nrow=1)
     nr <- nrow(x)
