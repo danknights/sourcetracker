@@ -37,7 +37,7 @@ if('Description' in colnames(metadata)) desc <- metadata$Description
 source('src/SourceTracker.r')
 
 # tune the alpha values using cross-validation (this is slow!)
-tune.results <- tune.st(otus[train.ix,], envs[train.ix], ntrials=100)
+tune.results <- tune.st(otus[train.ix,], envs[train.ix])
 alpha1 <- tune.results$best.alpha1
 alpha2 <- tune.results$best.alpha2
 # note: to skip tuning, run this instead:
