@@ -161,7 +161,6 @@ if(!is.null(resultsfile)){
     # train SourceTracker object on training data
     st <- sourcetracker(otus[source.ix,], envs[source.ix], rarefaction_depth=rarefaction)
 
-    print(tune.alphas)
     # if tuning is requested, obtain alpha values by cross-validation
     if(tune.alphas){
         tune.res <- tune.st(otus[source.ix,], envs[source.ix], rarefaction_depth=1000, verbosity=2)
