@@ -46,7 +46,7 @@ helpstr <- c(
 "-v: verbose output (default FALSE)")
 
 allowed.args <- list('-i'=NULL,'-t'=NULL,'-m'=NULL,'-n'=10,'-b'=100,'-r'=1000,
-                     '-o'=NULL, '-v'=FALSE, '-s'=FALSE, '-f'=NULL,'-R'=NULL,
+                     '-o'='.', '-v'=FALSE, '-s'=FALSE, '-f'=NULL,'-R'=NULL,
                      '--alpha1'=1e-3, '--alpha2'=1e-3, '--tune_alphas'=FALSE)
 
 # Parse command-line params
@@ -98,6 +98,11 @@ if(rarefaction==0) rarefaction <- NULL
 if(!is.null(outdir)) {
     dir.create(outdir,showWarnings=FALSE, recursive=TRUE)
 } else outdir <- '.'
+
+# save command that was run
+sink(sprintf('%s/command.txt',arglist[['-o']]))
+cat(paste(commandArgs(),collapse=' '),'\n',sep='')
+sink(NULL)
 
 # load list of samples to predict
 predictlist <- NULL
@@ -163,7 +168,9 @@ if(!is.null(resultsfile)){
 
     # if tuning is requested, obtain alpha values by cross-validation
     if(tune.alphas){
-        tune.res <- tune.st(otus[source.ix,], envs[source.ix], rarefaction_depth=1000, verbosity=2)
+        tune.res <- tune.st(otus[source.ix,], envs[source.ix], 
+                            rarefaction_depth=rarefaction, verbosity=2,
+                            alpha1=10**seq(-4,-2,1), alpha2=10**seq(-4,-2,1))
         alpha1 <- tune.res$best.alpha1
         alpha2 <- tune.res$best.alpha2
         cat(sprintf('After tuning: alpha1 = %f, alpha2 = %f\n', alpha1, alpha2))
