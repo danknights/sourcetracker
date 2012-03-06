@@ -40,14 +40,15 @@ helpstr <- c(
 "-o outdir: output directory; default is '.'",
 "-s predict source samples using leave-one-out predictions (default: FALSE)",
 "--alpha1 alpha1: Dirichlet hyperparameter for known environments (default: 1e-3)",
-"--alpha2 alpha2: Dirichlet hyperparameter for unknown environments (default: 1e-3)",
+"--alpha2 alpha2: Dirichlet hyperparameter for unknown environments (default: 1e-1)",
 "-R results file from previous run. If given, no predictions are made, only plotting and output files)",
-"--tune_alphas: Tune alpha values using cross-validation on the training set.",
+"--tune_alphas: tune_ntrials Tune alpha values using cross-validation on the training set with this many trials (suggest at least 25); (default: 0, no tuning)",
+"--eval_fit: fit_ntrials Evaluate quality of fit to the data using simulations. Ignored if less than or equal to --tune_alpha ntrials (default: 0)",
 "-v: verbose output (default FALSE)")
 
 allowed.args <- list('-i'=NULL,'-t'=NULL,'-m'=NULL,'-n'=10,'-b'=100,'-r'=1000,
                      '-o'='.', '-v'=FALSE, '-s'=FALSE, '-f'=NULL,'-R'=NULL,
-                     '--alpha1'=1e-3, '--alpha2'=1e-3, '--tune_alphas'=FALSE)
+                     '--alpha1'=1e-3, '--alpha2'=1e-1, '--tune_alphas'=0, '--eval_fit'=0)
 
 # Parse command-line params
 # assumes that NO args are positional
@@ -91,7 +92,8 @@ predictfile <- arglist[['-f']]
 resultsfile <- arglist[['-R']]
 alpha1 <- as.numeric(arglist[['--alpha1']])
 alpha2 <- as.numeric(arglist[['--alpha2']])
-tune.alphas <- arglist[['--tune_alphas']]
+tune.alphas.ntrials <- as.numeric(arglist[['--tune_alphas']])
+eval.fit.ntrials <- as.numeric(arglist[['--eval_fit']])
 if(rarefaction==0) rarefaction <- NULL
 
 # create output directory
@@ -167,18 +169,50 @@ if(!is.null(resultsfile)){
     st <- sourcetracker(otus[source.ix,], envs[source.ix], rarefaction_depth=rarefaction)
 
     # if tuning is requested, obtain alpha values by cross-validation
-    if(tune.alphas){
-        tune.res <- tune.st(otus[source.ix,], envs[source.ix], 
-                            rarefaction_depth=rarefaction, verbosity=2,
-                            alpha1=10**seq(-4,-2,1), alpha2=10**seq(-4,-2,1))
+    if(tune.alphas.ntrials > 0){
+        verbosity <- 0
+        if(arglist[['-v']]) verbosity <- 2
+        tune.res <- tune.st(otus[source.ix,], envs[source.ix], ntrials=tune.alphas.ntrials,
+                            rarefaction_depth=rarefaction, verbosity=verbosity)
         alpha1 <- tune.res$best.alpha1
         alpha2 <- tune.res$best.alpha2
-        cat(sprintf('After tuning: alpha1 = %f, alpha2 = %f\n', alpha1, alpha2))
+        cat(sprintf('After tuning: alpha1 = %f, alpha2 = %f, with RMSE= %.3f\n', alpha1, alpha2, tune.res$best.rmse))
+        # save alphas
+        sink(sprintf('%s/tuned.alphas.txt', outdir))
+        cat(sprintf('# Final alpha1=%f, alpha2=%f, RMSE=%.5f, pseudo-R2=%.5f +/- %.5f\n', 
+            alpha1, alpha2, tune.res$best.rmse,
+            tune.res$best.pseudo.r2.sem, tune.res$best.pseudo.r2.sem))
+        cat('alpha1\talpha2\tRMSE\tRMSE s.e.m.\n')
+        cat(sprintf('%f\t%f\t%.5f\t%.5f\n',
+            tune.res$alphas[,1], tune.res$alphas[,2], 
+            tune.res$rmse, tune.res$rmse.sem))
+        sink(NULL)
+    }
+    # plot tuning results
+    if(tune.alphas.ntrials > 0 || eval.fit.ntrials > 0) {
+        verbosity <- 0
+        if(arglist[['-v']]) verbosity <- 2
+        if(eval.fit.ntrials > tune.alphas.ntrials) {
+            if(arglist[['-v']]) cat(sprintf('Evaluating fit at alpha1=%f, alpha2=%f with %d trials\n',
+                                alpha1, alpha2, eval.fit.ntrials))
+            results.to.plot <- eval.fit(otus[source.ix,], envs[source.ix],
+                                ntrials=eval.fit.ntrials, rarefaction_depth=rarefaction,
+                                alpha1=alpha1, alpha2=alpha2, verbosity=verbosity-1)
+            sink(sprintf('%s/eval.fit.txt',outdir))
+            cat(sprintf('alpha1\t%.5f\nalpha2\t%.5f\nrmse\t%.5f\nrmse.sem\t%.5f\n',alpha1, alpha2, results.to.plot$rmse,results.to.plot$rmse.sem))
+            sink(NULL)
+        } else {
+            results.to.plot <- tune.res$results[[which.min(tune.res$rmse)]]
+        }
+        plot.eval(results.to.plot,plot.type=1,
+            filename=sprintf('%s/confusion_scatterplot_combined.pdf', outdir))
+        plot.eval(results.to.plot,plot.type=2,
+            filename=sprintf('%s/confusion_scatterplot_pairwise.pdf', outdir))
     }
 
     if(sourceonly){
         # Estimate leave-one-out source proportions in training data 
-        results <- predict(st, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2)
+        results <- predict(st, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, full=TRUE)
         filebase <- 'source_predictions'
     } else {
         # Estimate source proportions in test data
@@ -187,7 +221,7 @@ if(!is.null(resultsfile)){
             testdata <- matrix(testdata,nrow=1)
             rownames(testdata) <- rownames(otus)[sink.ix]
         }
-        results <- predict(st,testdata, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2)
+        results <- predict(st,testdata, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, full=TRUE)
         filebase <- 'sink_predictions'
     }
     # save full results object

@@ -35,7 +35,7 @@
     
     # get source environment counts
     # sources is nenvs X ntaxa
-    sources <- t(sapply(split(data.frame(train), envs), colSums))    
+    sources <- t(sapply(split(data.frame(train), envs), colSums)) 
     
     # add an empty row for "Unknown"
     sources <- rbind(sources, rep(0,ncol(train)))
@@ -89,7 +89,7 @@
 # samplenames - the names of the test samples
 "predict.sourcetracker" <- function(stobj, test=NULL, 
             burnin=100, nrestarts=10, ndraws.per.restart=1, delay=10,
-            alpha1=1e-3, alpha2=1e-3, beta=1e-2, rarefaction_depth=1000,
+            alpha1=1e-3, alpha2=1e-1, beta=1e-2, rarefaction_depth=1000,
             verbosity=1, full.results=FALSE){
 
     if(!is.null(test)){
@@ -255,7 +255,7 @@
 # full.results returns the source env. x taxon counts for every draw
 "run.gibbs" <- function(sources, test, V, T, N,
         burnin=100, nrestarts=10, ndraws.per.restart=10, delay=10,
-        alpha1=1e-3, alpha2=1e-3, beta=1e-2, maxdepth=NULL,
+        alpha1=1e-3, alpha2=.1, beta=1e-2, maxdepth=NULL,
         verbosity=1, printing.index=NULL, printing.total=NULL,
         full.results=FALSE){
 
@@ -391,42 +391,48 @@
 }
 
 
-# tries all values of alpha1 and alpha2 for best r-squared
+# tries all values of alpha1 and alpha2 for best RMSE
 # if individual.samples, tries to predict mixtures of single samples
 # instead of mixtures of the environment means
 # ntrials is the number of simulated samples per fit.
 # nrepeats is the number of times to repeat the entire experiment at each alpha value
 # verbosity > 1 means inner loop will print
-"tune.st" <- function(otus, envs, individual.samples=TRUE, ntrials=25, nrepeats=1,
-            rarefaction_depth=1000, alpha1=10**(-4:-2), alpha2=10**(-4:-2), verbosity=0, ...){
-    allres <- list()
-    alphas <- expand.grid(alpha1, alpha2)
+"tune.st" <- function(otus, envs, individual.samples=TRUE, ntrials=25,
+            rarefaction_depth=1000, alpha1=10**(-3), 
+            alpha2=10**(-3:0), verbosity=0, ...){
+    results <- list()
+    alphas <- expand.grid(rev(alpha1), alpha2)
     colnames(alphas) <- c('alpha1','alpha2')
-    r2 <- matrix(0, nrow=nrow(alphas), ncol=nrepeats)
-    for(j in 1:nrepeats){
-        cat(sprintf('* Outer loop %d of %d\n',j,nrepeats))
-        thisres <- list()
-        for(i in 1:nrow(alphas)){
-            cat(sprintf('Loop %d of %d, alpha1=%f, alpha2=%f ',i,nrow(alphas),alphas[i,1], alphas[i,2]))
-            if(verbosity > 2) cat('\n')
-            thisres[[i]] <- eval.fit(otus, envs, individual.samples=individual.samples,
-                                    ntrials=ntrials, rarefaction_depth=rarefaction_depth,
-                                    alpha1=alphas[i,1], alpha2=alphas[i,2], verbosity=verbosity-1, ...)
-            r2[i,j] <- thisres[[i]]$r2
-            if(verbosity > 0) cat(sprintf('R-squared = %.3f\n',r2[i,j]))
-        }
-        allres[[j]] <- thisres
+    rmse <- numeric(nrow(alphas))
+    rmse.sem <- numeric(nrow(alphas))
+    for(i in 1:nrow(alphas)){
+        cat(sprintf('Loop %d of %d, alpha1=%f, alpha2=%f ',i,nrow(alphas),alphas[i,1], alphas[i,2]))
+        if(verbosity > 2) cat('\n')
+        results[[i]] <- eval.fit(otus, envs, individual.samples=individual.samples,
+                                ntrials=ntrials, rarefaction_depth=rarefaction_depth,
+                                alpha1=alphas[i,1], alpha2=alphas[i,2], verbosity=verbosity-1, ...)
+        rmse[i] <- results[[i]]$rmse
+        rmse.sem[i] <- results[[i]]$rmse.sem
+        if(verbosity > 0) cat(sprintf('RMSE = %.3f +/- %.3f\n',rmse[i], rmse.sem[i]))
     }
-    best.r2 <- max(rowMeans(r2))
-    best.alpha1 <- alphas[which.max(rowMeans(r2)),1]
-    best.alpha2 <- alphas[which.max(rowMeans(r2)),2]
-    return(list(alphas=alphas, r2=r2, best.r2=best.r2, 
-                best.alpha1=best.alpha1, best.alpha2=best.alpha2, results=allres))
+    # choose alpha as most conservative value of alpha2 (smallest)
+    # then most conservative value of alpha1 (largest)
+    # that gives pseudo-r2 within 1 sem of the max.
+    # best.ix <- min(which(rmse <= min(rmse + rmse.sem)))
+    # Alternative: simply choose the lowest rmse
+    best.ix <- which.min(rmse)
+    best.rmse <- rmse[best.ix]
+    best.alpha1 <- alphas[best.ix,1]
+    best.alpha2 <- alphas[best.ix,2]
+    return(list(alphas=alphas, rmse=rmse, rmse.sem=rmse.sem, best.rmse=best.rmse, 
+                best.alpha1=best.alpha1, best.alpha2=best.alpha2, 
+                results=results))
 }
 
 # train SourceTracker object on training data
+# returns RMSE
 # ... are additional params to pass to sourcetracker predict object
-"eval.fit" <- function(otus, envs, individual.samples=FALSE,
+"eval.fit" <- function(otus, envs, individual.samples=TRUE,
             ntrials=25, rarefaction_depth=1000, verbosity=1, ...){
     train.envs <- sort(unique(envs))
     V <- length(train.envs)
@@ -509,12 +515,15 @@
         }
     }
 
-    # calculate r2
-    sst <- sum((y[,-V] - mean(y[,-V]))**2)
-    sse <- sum((y[,-V] - yhat[,-V])**2)
-    r2 <- max(1 - sse/sst, 0)
-
-    return(list(y=y,yhat=yhat,yhat.sd=yhat.sd,newsamples=newsamples, env.pairs=allenvs, train.envs=train.envs, r2=r2))
+    # calculate RMSE
+    se <- as.numeric((y[,-V] - yhat[,-V])**2)
+    mse <- mean(se)
+    se.sem <- sd(se)/sqrt(length(se))
+    rmse <- mse**.5
+    rmse.sem <- se.sem**.5
+    
+    return(list(y=y,yhat=yhat,yhat.sd=yhat.sd,newsamples=newsamples, 
+            env.pairs=allenvs, train.envs=train.envs, rmse=rmse, rmse.sem=rmse.sem))
 }
 
 
@@ -622,6 +631,65 @@
     segments(x - barw, lower, x + barw, lower, lwd=1.5, ...)
 }
 
+# plot type 1: predicted fit verses actual proportion of that site (when source is included)
+# plot type 2: predicted fit versus actual proportion of every other site, when other source is hidden
+"plot.eval" <- function(res, plot.all=FALSE,plot.type=c(1,2)[1], filename=NULL){
+    
+    V <- length(res$train.envs)
+    if(plot.type==1){
+        pch <- 16
+        mycolors <- c('#E41A1C', '#377EB8', '#4DAF4A', '#984EA3', '#FF7F00', '#A65628', '#F781BF', '#999999', '#8DD3C7', '#FFFFB3', '#BEBADA', '#FB8072', '#80B1D3', '#FDB462', '#B3DE69', '#FCCDE5', '#D9D9D9', '#BC80BD', '#CCEBC5')
+        mycolors <- sprintf('%sBB',mycolors)
+        if(!is.null(filename)) pdf(filename,width=6,height=6)
+        plot(0,0,xlim=0:1,ylim=0:1,type='n',xlab='True proportion', ylab='Estimated proportion')
+        abline(0,1)
+        for(i in 1:(V+1)){
+            # sourcetracker.error.bars(res$y[,i], res$yhat[,i], res$yhat.sd[,i],col='#33333399')
+            points(res$y[,i],res$yhat[,i],col=mycolors[i], pch=pch)
+        }
+        legend('topleft',legend=c(as.character(res$train.envs),'Unknown'),col=mycolors,pch=pch, cex=.75)
+        if(!is.null(filename)) dev.off()
+    } else {
+        if(!is.null(filename)) pdf(filename,width=10,height=10)
+        par(mfrow=c(V,V),mar=rep(.5,4))
+        par(mfrow=c(V,V),mar=c(4.5,4.5,.5,.5))
+        for(i in 1:V){
+            for(j in 1:V){
+                # keep only those points where j is the hidden source and i
+                # is not present
+                keepix <- which(res$env.pairs[,1] != i & res$env.pairs[,2] == j)
+                # don't plot same-same plots
+                if(i==j) {
+                    plot(0,0,xlim=c(-1,1), ylim=c(-1,1),type='n',xaxt='none',yaxt='none',xlab='', ylab='')
+                    text(0,0,res$train.envs[i], cex=2)
+                } else if(length(keepix) < 3){
+                    plot(0,0,type='n',xaxt='none', yaxt='none',xlab='', ylab='')
+                    text(0,0,'Too few samples')
+                } else if (i!=j){
+                    a <- res$y[keepix,V+1] # actual hidden proportion
+                    b <- res$yhat[keepix,i]; # recovered proportion for this other source
+                    rmse <- mean(b**2)**.5
+                    plot.color <- 'black'
+                    # plot red if RMSE > .1
+                    if(rmse > .1) plot.color='red'
+                    plot(a,b,type='p',xaxt='none',yaxt='none',
+                         xlim=0:1,ylim=0:1,col=plot.color,
+                         xlab='', ylab='')
+                    # draw axis labels close to the axes
+                    cex = .65
+                    # mtext(sprintf('Prop. %s',res$train.envs[j]), side=1, line=1, cex=cex)
+                    # mtext(sprintf('Prop. %s when %s absent',res$train.envs[i],res$train.envs[j]), side=2, line=1, cex=cex)
+                    mtext(sprintf('Prop. Env 1',res$train.envs[j]), side=1, line=1, cex=cex)
+                    mtext(sprintf('Prop. Env 2 when 1 absent',res$train.envs[i],res$train.envs[j]), side=2, line=1, cex=cex)
+                    cex=1
+                    text(0.05,.90,sprintf('RMSE = %.3f',rmse),adj=c(0,0),cex=cex,col=plot.color)
+                }
+            }
+        }
+        if(!is.null(filename)) dev.off()
+    }
+}
+
 # sorts a matrix by first column, breaks ties by the 2nd, 3rd, etc. columns
 # returns row indices
 "sortmatrix" <- function(x){
@@ -652,7 +720,7 @@
 
 "kld" <- function(p,q){
     nonzero <- p>0 & q>0
-    return(sum(p[nonzero] * log(p[nonzero]/q[nonzero])))    
+    return(sum(p[nonzero] * log2(p[nonzero]/q[nonzero])))    
 }
 
 # global definition of standard env colors

@@ -10,14 +10,13 @@ metadata <- read.table('data/metadata.txt',sep='\t',h=T,row.names=1,check=F,comm
 # namely, the first line begins with a '#' sign
 # and actually _is_ a comment; the second line
 # begins with a '#' sign but is actually the header
-otus <- read.table('data/otus.txt',sep='\t',
-            header=T,row.names=1,check=F,skip=1,comment='')
+otus <- read.table('data/otus.txt',sep='\t', header=T,row.names=1,check=F,skip=1,comment='')
 otus <- t(as.matrix(otus))
 
 # extract only those samples in common between the two tables
 common.sample.ids <- intersect(rownames(metadata), rownames(otus))
 otus <- otus[common.sample.ids,]
-metadata <- metadata[common.sample.ids]
+metadata <- metadata[common.sample.ids,]
 # double-check that the mapping file and otu table
 # had overlapping samples
 if(length(common.sample.ids) <= 1) {
@@ -30,18 +29,18 @@ if(length(common.sample.ids) <= 1) {
 train.ix <- which(metadata$SourceSink=='source')
 test.ix <- which(metadata$SourceSink=='sink')
 envs <- metadata$Env
-if('Description' in colnames(metadata)) desc <- metadata$Description
+if(is.element('Description',colnames(metadata))) desc <- metadata$Description
 
 
 # load SourceTracker package
 source('src/SourceTracker.r')
 
 # tune the alpha values using cross-validation (this is slow!)
-tune.results <- tune.st(otus[train.ix,], envs[train.ix])
-alpha1 <- tune.results$best.alpha1
-alpha2 <- tune.results$best.alpha2
+# tune.results <- tune.st(otus[train.ix,], envs[train.ix])
+# alpha1 <- tune.results$best.alpha1
+# alpha2 <- tune.results$best.alpha2
 # note: to skip tuning, run this instead:
-# alpha1 <- alpha2 <- 0.001
+alpha1 <- alpha2 <- 0.001
 
 # train SourceTracker object on training data
 st <- sourcetracker(otus[train.ix,], envs[train.ix])
