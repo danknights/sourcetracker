@@ -89,7 +89,7 @@
 # samplenames - the names of the test samples
 "predict.sourcetracker" <- function(stobj, test=NULL, 
             burnin=100, nrestarts=10, ndraws.per.restart=1, delay=10,
-            alpha1=1e-3, alpha2=1e-1, beta=1e-2, rarefaction_depth=1000,
+            alpha1=1e-3, alpha2=1e-1, beta=10, rarefaction_depth=1000,
             verbosity=1, full.results=FALSE){
 
     if(!is.null(test)){
@@ -214,7 +214,7 @@
     if(is.null(gridsize)) gridsize <- ceiling(sqrt(N))
     if(is.null(titlesize)){
         if(gridsize > 1){
-            titlesize <- .7/log10(gridsize)
+            titlesize <- .3/log10(gridsize)
         } else {
             titlesize=1
         }
@@ -255,7 +255,7 @@
 # full.results returns the source env. x taxon counts for every draw
 "run.gibbs" <- function(sources, test, V, T, N,
         burnin=100, nrestarts=10, ndraws.per.restart=10, delay=10,
-        alpha1=1e-3, alpha2=.1, beta=1e-2, maxdepth=NULL,
+        alpha1=1e-3, alpha2=.1, beta=10, maxdepth=NULL,
         verbosity=1, printing.index=NULL, printing.total=NULL,
         full.results=FALSE){
 
@@ -326,31 +326,20 @@
                     envcounts[z[ix]] <- envcounts[z[ix]] - 1
                     if(z[ix] == V)    sources[V,taxon] <- sources[V,taxon] - 1
 
-
                     # get relative PDF over env assignments
                     p_tv <- sources[,taxon] / rowSums(sources) # Pr(taxon | env)
                     p_v <- envcounts/p_v_denominator# Pr(env in sample)
-                    
-                    
-                    if(1==0){
-                        cat(sprintf('otu index %d:\n', taxon))
-                        cat(sprintf('%.5f\t%.5f\n',p_tv, p_v))
-                        cat('Actual counts: ')
-                        cat(sprintf('%.5f',sources[,taxon]),sep='\t')
-                        
-                        cat('\n\n')
-                        # if(cnt > 10   ) stop()
-                        cnt <- cnt + 1
-                    }
+
                     # re-sample this sequence's env assignment
                     z[ix] <- sample(1:V, prob=p_tv * p_v, size=1)
-                    # cat(sprintf('OTU ID %d: %d\n', taxon, z[ix]))
+
                     # replace this sequence in all counts
                     envcounts[z[ix]] <- envcounts[z[ix]] + 1
 
                     # if this sequence is assigned to "other", increase count
                     if(z[ix] == V)    sources[V,taxon] <- sources[V,taxon] + 1
                 }
+                
                 # take sample
                 if(rep > burnin && (((rep-burnin) %% delay)==1 || delay<=1)){
                         
@@ -391,6 +380,7 @@
 }
 
 
+
 # tries all values of alpha1 and alpha2 for best RMSE
 # if individual.samples, tries to predict mixtures of single samples
 # instead of mixtures of the environment means
@@ -399,7 +389,7 @@
 # verbosity > 1 means inner loop will print
 "tune.st" <- function(otus, envs, individual.samples=TRUE, ntrials=25,
             rarefaction_depth=1000, alpha1=10**(-3), 
-            alpha2=10**(-3:0), verbosity=0, ...){
+            alpha2=10**(-3:0), beta=10, verbosity=0, ...){
     results <- list()
     alphas <- expand.grid(rev(alpha1), alpha2)
     colnames(alphas) <- c('alpha1','alpha2')
@@ -410,7 +400,7 @@
         if(verbosity > 2) cat('\n')
         results[[i]] <- eval.fit(otus, envs, individual.samples=individual.samples,
                                 ntrials=ntrials, rarefaction_depth=rarefaction_depth,
-                                alpha1=alphas[i,1], alpha2=alphas[i,2], verbosity=verbosity-1, ...)
+                                alpha1=alphas[i,1], alpha2=alphas[i,2], beta=beta, verbosity=verbosity-1, ...)
         rmse[i] <- results[[i]]$rmse
         rmse.sem[i] <- results[[i]]$rmse.sem
         if(verbosity > 0) cat(sprintf('RMSE = %.3f +/- %.3f\n',rmse[i], rmse.sem[i]))
