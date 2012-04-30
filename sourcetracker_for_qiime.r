@@ -39,16 +39,19 @@ helpstr <- c(
 "-f sampleid_file, file containing list of samples to predict. Useful for parallel processing (default None).",
 "-o outdir: output directory; default is '.'",
 "-s predict source samples using leave-one-out predictions (default: FALSE)",
-"--alpha1 alpha1: Dirichlet hyperparameter for known environments (default: 1e-3)",
-"--alpha2 alpha2: Dirichlet hyperparameter for unknown environments (default: 1e-1)",
+"--alpha1 alpha1: Dirichlet hyperparameter for taxa/genes in known environments (default: 1e-3)",
+"--alpha2 alpha2: Dirichlet hyperparameter for taxa/genes in unknown environments (default: 1e-1)",
+"--beta beta: Dirichlet hyperparameter for mixture of environments (default: 1e-2)",
 "-R results file from previous run. If given, no predictions are made, only plotting and output files)",
 "--tune_alphas: tune_ntrials Tune alpha values using cross-validation on the training set with this many trials (suggest at least 25); (default: 0, no tuning)",
+"--color_ix: comma-separated list of color indices for alphabetical source environments",
 "--eval_fit: fit_ntrials Evaluate quality of fit to the data using simulations. Ignored if less than or equal to --tune_alpha ntrials (default: 0)",
 "-v: verbose output (default FALSE)")
 
 allowed.args <- list('-i'=NULL,'-t'=NULL,'-m'=NULL,'-n'=10,'-b'=100,'-r'=1000,
                      '-o'='.', '-v'=FALSE, '-s'=FALSE, '-f'=NULL,'-R'=NULL,
-                     '--alpha1'=1e-3, '--alpha2'=1e-1, '--tune_alphas'=0, '--eval_fit'=0)
+                     '--alpha1'=1e-3, '--alpha2'=1e-1, '--beta'=1e-2, '--tune_alphas'=0, '--eval_fit'=0,
+                     '--color_ix'=NULL)
 
 # Parse command-line params
 # assumes that NO args are positional
@@ -92,9 +95,15 @@ predictfile <- arglist[['-f']]
 resultsfile <- arglist[['-R']]
 alpha1 <- as.numeric(arglist[['--alpha1']])
 alpha2 <- as.numeric(arglist[['--alpha2']])
+beta <- as.numeric(arglist[['--beta']])
 tune.alphas.ntrials <- as.numeric(arglist[['--tune_alphas']])
 eval.fit.ntrials <- as.numeric(arglist[['--eval_fit']])
 if(rarefaction==0) rarefaction <- NULL
+env.colors <- NULL
+if(!is.null(arglist[['--color_ix']])){
+    env.ix <- as.numeric(strsplit(arglist[['--color_ix']],',')[[1]])
+    env.colors <- std.env.colors[env.ix]
+}
 
 # create output directory
 if(!is.null(outdir)) {
@@ -173,7 +182,7 @@ if(!is.null(resultsfile)){
         verbosity <- 0
         if(arglist[['-v']]) verbosity <- 2
         tune.res <- tune.st(otus[source.ix,], envs[source.ix], ntrials=tune.alphas.ntrials,
-                            rarefaction_depth=rarefaction, verbosity=verbosity)
+                            rarefaction_depth=rarefaction, verbosity=verbosity, beta=beta)
         alpha1 <- tune.res$best.alpha1
         alpha2 <- tune.res$best.alpha2
         cat(sprintf('After tuning: alpha1 = %f, alpha2 = %f, with RMSE= %.3f\n', alpha1, alpha2, tune.res$best.rmse))
@@ -197,7 +206,7 @@ if(!is.null(resultsfile)){
                                 alpha1, alpha2, eval.fit.ntrials))
             results.to.plot <- eval.fit(otus[source.ix,], envs[source.ix],
                                 ntrials=eval.fit.ntrials, rarefaction_depth=rarefaction,
-                                alpha1=alpha1, alpha2=alpha2, verbosity=verbosity-1)
+                                alpha1=alpha1, alpha2=alpha2, beta=beta, verbosity=verbosity-1)
             sink(sprintf('%s/eval.fit.txt',outdir))
             cat(sprintf('alpha1\t%.5f\nalpha2\t%.5f\nrmse\t%.5f\nrmse.sem\t%.5f\n',alpha1, alpha2, results.to.plot$rmse,results.to.plot$rmse.sem))
             sink(NULL)
@@ -212,7 +221,7 @@ if(!is.null(resultsfile)){
 
     if(sourceonly){
         # Estimate leave-one-out source proportions in training data 
-        results <- predict(st, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, full=TRUE)
+        results <- predict(st, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=TRUE)
         filebase <- 'source_predictions'
     } else {
         # Estimate source proportions in test data
@@ -221,7 +230,7 @@ if(!is.null(resultsfile)){
             testdata <- matrix(testdata,nrow=1)
             rownames(testdata) <- rownames(otus)[sink.ix]
         }
-        results <- predict(st,testdata, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, full=TRUE)
+        results <- predict(st,testdata, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=TRUE)
         filebase <- 'sink_predictions'
     }
     # save full results object
@@ -289,8 +298,8 @@ for(plot.type in plot.types){
     # plot each env separately
     for(env in unique(envs)){
         plotixs <- which(envs == env)
-        pdf(sprintf('%s/%s_%s_%s.pdf',outdir,filebase,plot.type,env),width=8,height=8)
-        plot(results, type=plot.type, labels=labels, include.legend=TRUE, indices=plotixs)
+        pdf(sprintf('%s/%s_%s_%s.pdf',outdir,filebase,plot.type,env),width=5,height=5)
+        plot(results, type=plot.type, labels=labels, include.legend=TRUE, indices=plotixs, env.colors=env.colors)
         dev.off()    
     }
 }
