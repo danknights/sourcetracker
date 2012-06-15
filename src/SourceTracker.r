@@ -31,7 +31,8 @@
     train.envs <- sort(unique(levels(envs)))
     
     # rarefy samples above maxdepth if requested
-    if(!is.null(rarefaction_depth)) train <- rarefy(train, rarefaction_depth)
+    if(!is.null(rarefaction_depth) && rarefaction_depth > 0) train <- rarefy(train, rarefaction_depth)
+    if(!is.null(rarefaction_depth) && rarefaction_depth > 0) cat(sprintf('Rarefying training data at %d\n',rarefaction_depth))
     
     # get source environment counts
     # sources is nenvs X ntaxa
@@ -287,6 +288,7 @@
     for(i in 1:N){
         sink <- test[i,]
         D <- sum(sink) # sink sample depth
+        
         # precalculate denominator for Pr(env in sample)
         p_v_denominator = max(1,(D-1) + V*beta)
         
