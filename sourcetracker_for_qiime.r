@@ -36,6 +36,7 @@ helpstr <- c(
 "-n number of restarts of Gibbs sampling (default 10)",
 "-b number of burn-in iterations for Gibbs sampling (default 100)",
 "-r rarefaction depth, 0 for none (default 1000)",
+"--train_rarefaction training data rarefaction depth, 0 for none (default 1000)",
 "-f sampleid_file, file containing list of samples to predict. Useful for parallel processing (default None).",
 "-o outdir: output directory; default is '.'",
 "-s predict source samples using leave-one-out predictions (default: FALSE)",
@@ -49,6 +50,7 @@ helpstr <- c(
 "-v: verbose output (default FALSE)")
 
 allowed.args <- list('-i'=NULL,'-t'=NULL,'-m'=NULL,'-n'=10,'-b'=100,'-r'=1000,
+                     '--train_rarefaction'=1000,
                      '-o'='.', '-v'=FALSE, '-s'=FALSE, '-f'=NULL,'-R'=NULL,
                      '--alpha1'=1e-3, '--alpha2'=1e-1, '--beta'=1e-2, '--tune_alphas'=0, '--eval_fit'=0,
                      '--color_ix'=NULL)
@@ -89,6 +91,7 @@ if(is.null(arglist[['-R']])){
 nrestarts <- as.numeric(arglist[['-n']])
 burnin <- as.numeric(arglist[['-b']])
 rarefaction <- as.numeric(arglist[['-r']])
+train.rarefaction <- as.numeric(arglist[['--train_rarefaction']])
 sourceonly <- arglist[['-s']]
 outdir <- arglist[['-o']]
 predictfile <- arglist[['-f']]
@@ -175,7 +178,7 @@ if(!is.null(resultsfile)){
     envs <- map$Env
 
     # train SourceTracker object on training data
-    st <- sourcetracker(otus[source.ix,], envs[source.ix], rarefaction_depth=rarefaction)
+    st <- sourcetracker(otus[source.ix,], envs[source.ix], rarefaction_depth=train.rarefaction)
 
     # if tuning is requested, obtain alpha values by cross-validation
     if(tune.alphas.ntrials > 0){
