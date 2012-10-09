@@ -27,9 +27,12 @@ Run sink predictions using QIIME OTU table with 1000 burnins, 25 random restarts
 
 
 Change log:
+Version 0.9.2:
+ - Now allows mapping files without "SourceSink" column when using -s (leave-one-out predictions).
 
-- Modified default alpha values to 0.001.
-- Added automatic tuning of alpha values. This is slow, but should be performed before publishing the output.
+Version 0.9.1:
+ - Modified default alpha values to 0.001.
+ - Added automatic tuning of alpha values. This is slow, but should be performed before publishing the output.
 
 Version 0.9.0:
  - First 'official' beta release.
