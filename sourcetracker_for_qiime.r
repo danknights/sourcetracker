@@ -127,8 +127,13 @@ if(!is.null(predictfile)){
 # load mapping file
 map <- read.table(arglist[['-m']],sep='\t',comment='',head=T,row.names=1,check=FALSE)
 if(sum(colnames(map)=='Env')==0) stop("The mapping file must contain an 'Env' column naming the source environment for each sample.")
-if(sum(colnames(map)=='SourceSink')==0) stop("The mapping file must contain a 'SourceSink' column indicating 'source' or 'sink' for each sample.")
-map$SourceSink <- factor(map$SourceSink,levels=c('source','sink','ignore'))
+if(sourceonly){
+    map$SourceSink <- factor(rep('source',nrow(map)),levels=c('source','sink','ignore'))
+} else {
+    if(sum(colnames(map)=='SourceSink')==0) stop("The mapping file must contain a 'SourceSink' column indicating 'source' or 'sink' for each sample.")
+    map$SourceSink <- factor(map$SourceSink,levels=c('source','sink','ignore'))
+}
+
 
 if(!is.null(resultsfile)){
     load(resultsfile)
