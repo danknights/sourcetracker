@@ -46,6 +46,7 @@
     
     ret <- list(sources=sources, train=train, envs=envs)
     class(ret) <- "sourcetracker"
+    
     return(invisible(ret))
 }
 
@@ -113,7 +114,6 @@
         V <- nrow(sources) # number of source envs
         if(is.null(dim(test))) N <- 1
         else N <- nrow(test) # number of sink samples
-
         samplenames <- rownames(test)
         draws <- run.gibbs(sources, test, V, T, N,
                 burnin=burnin, nrestarts=nrestarts, 
@@ -133,7 +133,10 @@
         N <- nrow(stobj$train) # number of sink samples
         ndraws <- nrestarts * ndraws.per.restart # total number of draws
         draws <- array(0,dim=c(ndraws, V, N))
-        full.draws <- array(0,dim=c(ndraws, V, T, N))
+        cat(sprintf('ndraws=%d, V=%d, T=%d, N=%d\n',ndraws, V, T, N))
+        if(full.results){
+            full.draws <- array(0,dim=c(ndraws, V, T, N))
+        }
         for(i in (1:N)){
             stobj.i <- sourcetracker(stobj$train[-i,], envs[-i], rarefaction_depth=rarefaction_depth)
             sources <- stobj$sources
@@ -348,7 +351,6 @@
                     # save current mixing proportions
                     draws[drawcount,,i] <- round((envcounts - beta) / D,7)
                     draws[drawcount,,i] <- draws[drawcount,,i] / sum(draws[drawcount,,i])
-                    
                     # save full taxon-source assignments if requested
                     if(full.results){
                         # for each environment, save taxon counts
@@ -586,11 +588,14 @@
             ix <- sortmatrix(x[,sortby.ix])
             x <- x[ix,]
         } else {
-            ix <- cmdscale(jsdmatrix(x),k=1)
-            ix <- sort(ix,index=T)$ix
-            x <- x[ix,]
+            d <- jsdmatrix(x)
+            if(sum(d) > 0){
+                # ensure that all mixtures were not identical (e.g. 100% unknown)
+                ix <- cmdscale(jsdmatrix(x),k=1)
+                ix <- sort(ix,index=T)$ix
+                x <- x[ix,]
+            }
         }
-        
         centers <- barplot(t(x), beside=FALSE, col=env.colors,
                 space=-1/ncol(x), border=NA, axes=FALSE, axisnames=FALSE,
                 main=labels[i],cex.main=titlesize,
