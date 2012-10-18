@@ -152,11 +152,22 @@ if(!is.null(resultsfile)){
     }
     # drop "Consensus Lineage" column if present
     otus <- as.matrix(t(otus[,!grepl('Consensus|Metadata',colnames(otus))]))
+    
 
     # ensure map and data table contain the same samples in the same order
     ix <- intersect(rownames(map), rownames(otus))
     otus <- otus[ix,]
     map <- map[ix,]
+
+    # ensure there are no "empty" samples
+    rs <- rowSums(otus)
+    num.empties <- sum(rs == 0) 
+    if(num.empties > 0){
+        stop(sprintf("The following %d samples have zero sequences: %s",
+                num.empties,
+                paste(rownames(otus)[rs==0],collapse=', '))
+            )
+    }
 
     # extract metadata from mapping file
     if(!is.null(predictlist)){
