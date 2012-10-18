@@ -229,7 +229,7 @@ if(!is.null(resultsfile)){
 
     if(sourceonly){
         # Estimate leave-one-out source proportions in training data 
-        results <- predict(st, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=TRUE)
+        results <- predict(st, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=FALSE)
         filebase <- 'source_predictions'
     } else {
         # Estimate source proportions in test data
@@ -238,7 +238,7 @@ if(!is.null(resultsfile)){
             testdata <- matrix(testdata,nrow=1)
             rownames(testdata) <- rownames(otus)[sink.ix]
         }
-        results <- predict(st,testdata, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=TRUE)
+        results <- predict(st,testdata, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=FALSE)
         filebase <- 'sink_predictions'
     }
     # save full results object
