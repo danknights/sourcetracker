@@ -128,7 +128,10 @@ if(!is.null(predictfile)){
 map <- read.table(arglist[['-m']],sep='\t',comment='',head=T,row.names=1,check=FALSE)
 if(sum(colnames(map)=='Env')==0) stop("The mapping file must contain an 'Env' column naming the source environment for each sample.")
 if(sourceonly){
-    map$SourceSink <- factor(rep('source',nrow(map)),levels=c('source','sink','ignore'))
+    # if no sourcesink column, use all samples for leave-one-out
+    if(sum(colnames(map)=='SourceSink')==0){
+        map$SourceSink <- factor(rep('source',nrow(map)),levels=c('source','sink','ignore'))
+    }
 } else {
     if(sum(colnames(map)=='SourceSink')==0) stop("The mapping file must contain a 'SourceSink' column indicating 'source' or 'sink' for each sample.")
     map$SourceSink <- factor(map$SourceSink,levels=c('source','sink','ignore'))
@@ -267,44 +270,9 @@ cat('SampleID\t')
 write.table(results$proportions_sd,quote=F,sep='\t')
 sink(NULL)
 
-# also append results to a new version of the mapping file in output directory
-# add columns filled with NA to the mapping file, add values where available
-for(j in 1:ncol(results$proportions)){
-    colname <- sprintf('Proportion_%s',colnames(results$proportions)[j])
-    colname_sd <- sprintf('Proportion_SD_%s',colnames(results$proportions)[j])
-    map[,colname] <- rep(NA,nrow(map))
-    map[rownames(results$proportions), colname] <- results$proportions[,j]
-    map[rownames(results$proportions), colname_sd] <- results$proportions_sd[,j]
-}
-
-# add this environment and its s.d. to mapping file
-thisenv <- rep(NA,nrow(results$proportions))
-thisenv_sd <- rep(NA,nrow(results$proportions))
-for(i in 1:nrow(results$proportions)){
-    sampleid <- rownames(results$proportions)[i]
-    whichenv <- which(results$train.envs==map[sampleid,'Env'])
-    if(length(whichenv) > 0){
-        thisenv[i] <-  results$proportions[i,whichenv]
-        thisenv_sd[i] <- results$proportions_sd[i,whichenv]
-    }
-}
-map[,'Proportion_This_Env'] <- rep(NA, nrow(map))
-map[,'Proportion_SD_This_Env'] <- rep(NA, nrow(map))
-map[rownames(results$proportions), 'Proportion_This_Env'] <- thisenv
-map[rownames(results$proportions), 'Proportion_SD_This_Env'] <- thisenv_sd
-
-# write new mapping file
-sink(sprintf('%s/map_all_samples.txt',outdir))
-cat('#SampleID\t')
-write.table(map,sep='\t',quote=F)
-sink(NULL)
-
-# write new mapping file
-sink(sprintf('%s/map.txt',outdir))
-cat('#SampleID\t')
-write.table(map[rownames(results$proportions),],sep='\t',quote=F)
-sink(NULL)
-
+save.mapping.file(results, map,
+        filename=sprintf('%s/map.txt',outdir),
+        include.contamination.predictions=sourceonly)
 
 # make plots
 if(dim(results$draws)[2] > 1) {

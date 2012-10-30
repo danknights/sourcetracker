@@ -687,6 +687,49 @@
     }
 }
 
+"save.mapping.file" <- function(results, map, filename='map.txt',
+        include.contamination.predictions=FALSE){
+    # also append results to a new version of the mapping file in output directory
+    # add columns filled with NA to the mapping file, add values where available
+    for(j in 1:ncol(results$proportions)){
+        colname <- sprintf('Proportion_%s',colnames(results$proportions)[j])
+        colname_sd <- sprintf('Proportion_SD_%s',colnames(results$proportions)[j])
+        map[,colname] <- rep(NA,nrow(map))
+        map[rownames(results$proportions), colname] <- results$proportions[,j]
+        map[rownames(results$proportions), colname_sd] <- results$proportions_sd[,j]
+    }
+    
+    # add this environment and its s.d. to mapping file
+    thisenv <- rep(NA,nrow(results$proportions))
+    thisenv_sd <- rep(NA,nrow(results$proportions))
+    for(i in 1:nrow(results$proportions)){
+        sampleid <- rownames(results$proportions)[i]
+        whichenv <- which(results$train.envs==map[sampleid,'Env'])
+        if(length(whichenv) > 0){
+            thisenv[i] <-  results$proportions[i,whichenv]
+            thisenv_sd[i] <- results$proportions_sd[i,whichenv]
+        }
+    }
+    map[,'Proportion_This_Env'] <- rep(NA, nrow(map))
+    map[,'Proportion_SD_This_Env'] <- rep(NA, nrow(map))
+    map[rownames(results$proportions), 'Proportion_This_Env'] <- thisenv
+    map[rownames(results$proportions), 'Proportion_SD_This_Env'] <- thisenv_sd
+    
+    if(include.contamination.predictions){
+        for(threshold in seq(0.05, 0.95, .05)){
+            header <- sprintf('contaminated_at_%.02f',threshold)
+            map[,header] <- rep(NA, nrow(map))
+            map[rownames(results$proportions), header] <- as.character(thisenv < threshold)
+        }
+    }
+        
+    # write new mapping file
+    sink(filename)
+    cat('#SampleID\t')
+    write.table(map,sep='\t',quote=F)
+    sink(NULL)
+}
+
 # sorts a matrix by first column, breaks ties by the 2nd, 3rd, etc. columns
 # returns row indices
 "sortmatrix" <- function(x){
