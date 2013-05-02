@@ -1,0 +1,306 @@
+#SampleID	Description	Env	SourceSink	Study	Details
+Run20100430_H2O-1	PCR water 1	Lab 1	sink	Lab 1	PCR_water_sample_1_2010_04_30_run
+Run20100430_H2O-2	PCR water 2	Lab 1	sink	Lab 1	PCR_water_sample_2_2010_04_30_run
+Run20100430_H2O-3	PCR water 3	Lab 1	sink	Lab 1	PCR_water_sample_3_2010_04_30_run
+Run20100430_H2O-4	PCR water 4	Lab 1	sink	Lab 1	PCR_water_sample_4_2010_04_30_run
+Run20100430_H2O-5	PCR water 5	Lab 1	sink	Lab 1	PCR_water_sample_5_2010_04_30_run
+Run20100430_ESC_C-7as	Scissors 1	Lab 1	sink	Lab 1	Autoclaved_and_flamed_scissor_swab_sample_2010_04_30_run
+Run20100430_ESC_C-6as	Scissors 2	Lab 1	sink	Lab 1	Autoclaved_scissor_swab_sample_2010_04_30_run
+Run20100430_ESC_C-4ss	Swab 1	Lab 1	sink	Lab 1	Sterile_swab_sample_4_2010_04_30_run
+Run20100430_ESC_C-5ss	Swab 2	Lab 1	sink	Lab 1	Sterile_swab_sample_5_2010_04_30_run
+Run20100430_ESC_C-3ss	Swab 3	Lab 1	sink	Lab 1	Sterile_swab_sample_3_2010_04_30_run
+Run20100430_ESC_C-1ss	Swab 4	Lab 1	sink	Lab 1	Sterile_swab_sample_1_2010_04_30_run
+Run20100430_ESC_C-2ss	Swab 5	Lab 1	sink	Lab 1	Sterile_swab_sample_2_2010_04_30_run
+Run20100524_H2O-1	PCR water 1	Lab 2	sink	Lab 2	PCR_water_sample_1_2010_05_24_run
+Run20100524_H2O-2	PCR water 2	Lab 2	sink	Lab 2	PCR_water_sample_2_2010_05_24_run
+Run20100524_H2O-3	PCR water 3	Lab 2	sink	Lab 2	PCR_water_sample_3_2010_05_24_run
+Run20100524_H2O-4	PCR water 4	Lab 2	sink	Lab 2	PCR_water_sample_4_2010_05_24_run
+Run20100524_H2O-5	PCR water 5	Lab 2	sink	Lab 2	PCR_water_sample_5_2010_05_24_run
+Run20100524_ESC_C-2ss	Swab 1	Lab 2	sink	Lab 2	Sterile_swab_sample_2_2010_05_24_run
+Run20100524_ESC_C-3ss	Swab 2	Lab 2	sink	Lab 2	Sterile_swab_sample_3_2010_05_24_run
+Run20100524_ESC_C-4ss	Swab 3	Lab 2	sink	Lab 2	Sterile_swab_sample_4_2010_05_24_run
+Run20100524_ESC_C-5ss	Swab 4	Lab 2	sink	Lab 2	Sterile_swab_sample_5_2010_05_24_run
+Run20100524_ESC_C-7as	Swab 5	Lab 2	sink	Lab 2	Autoclaved_and_flamed_scissor_swab_sample_2010_05_24_run
+Run20100524_ESC_C-6as	Swab 6	Lab 2	sink	Lab 2	Autoclaved_scissor_swab_sample_2010_05_24_run
+Run20100524_ESC_C-1ss	Swab 7	Lab 2	sink	Lab 2	Sterile_swab_sample_1_2010_05_24_run
+ESC_3.10	Bench 1	Lab 3	sink	Lab 3	Bench_Lab_B
+ESC_3.2	Bench 2	Lab 3	sink	Lab 3	Bench_Lab_B
+ESC_3.8	Bench 3	Lab 3	sink	Lab 3	Bench_Lab_B
+ESC_3.12	Handle 	Lab 3	sink	Lab 3	DoorHandle_Lab_B
+ESC_3.0	Hood 1	Lab 3	sink	Lab 3	HoodBay_Lab_A
+ESC_3.13	Hood 2	Lab 3	sink	Lab 3	HoodBench_Lab_B
+ESC_3.7	Keyboard 	Lab 3	sink	Lab 3	Keyboard
+ESC_3.6	PCR rack 	Lab 3	sink	Lab 3	96wellrack
+ESC_3.14	PCR table 1	Lab 3	sink	Lab 3	PCRTable_Lab_B
+ESC_3.9	PCR table 2	Lab 3	sink	Lab 3	PCRRoom_tabletop
+ESC_3.11	Sill 1	Lab 3	sink	Lab 3	DoorSil_Lab_B
+ESC_3.1	Sill 2	Lab 3	sink	Lab 3	WindowSil_Lab_A
+ESC_3.15	Sill 3	Lab 3	sink	Lab 3	WindowSil_Lab_B
+ESC_3.3	Sill 4	Lab 3	sink	Lab 3	WindowSil_BreakRoom4thFl
+Bission_H20_1_JH	Water 1	Lab 3	sink	Lab 3	WaterExtraction_1
+Bission_H20_2_CA	Water 2	Lab 3	sink	Lab 3	WaterExtraction_2
+UDB19	Button 1	NICU	sink	NICU	Swab_was_taken_from_NICU_door_button_surface1_UCSD
+MDB7	Button 2	NICU	sink	NICU	Swab_was_taken_from_NICU_door_button_surface2_MB
+MDB6	Button 3	NICU	sink	NICU	Swab_was_taken_from_NICU_door_button_surface1_MB
+UDB31	Button 4	NICU	sink	NICU	Swab_was_taken_from_NICU_door_button_surface2_UCSD
+MBD10	Counter 1	NICU	sink	NICU	Swab_was_taken_from_NICU_baby_open_bedside_diaper_counter_machine_MB
+UBD22	Counter 2	NICU	sink	NICU	Swab_was_taken_from_NICU_baby_open_bedside_diaper_counter_machinE_UCSD
+MSO9	Counter 3	NICU	sink	NICU	Swab_was_taken_from_NICU_counter_next_to_sink_MB
+USO26	Counter 4	NICU	sink	NICU	Swab_was_taken_from_NICU_counter_next_to_sink_UCSD
+MSC8	Handle 1	NICU	sink	NICU	Swab_was_taken_from_NICU_sink_cabinet_handles_MB
+MBR13	Handle 2	NICU	sink	NICU	Swab_was_taken_from_NICU_Baby_open_bedside_drawer_handle_beneath_bed_MB
+MIR11	Handle 3	NICU	sink	NICU	Swab_was_taken_from_NICU_incubator_drawer_handle_beneath_incubator_MB
+MWR15	Handle 4	NICU	sink	NICU	Swab_was_taken_from_NICU_traveling_weigh_cart_drawer_handles1_MB
+MWR16	Handle 5	NICU	sink	NICU	Swab_was_taken_from_NICU_traveling_weigh_cart_drawer_handles2_MB
+UBR25	Handle 6	NICU	sink	NICU	Swab_was_taken_from_NICU_Baby_open_bedside_drawer_handle_beneath_bed_UCSD
+UIR24	Handle 7	NICU	sink	NICU	Swab_was_taken_from_NICU_incubator_drawer_handle_beneath_incubator_UCSD
+UWR20	Handle 8	NICU	sink	NICU	Swab_was_taken_from_NICU_traveling_weigh_cart_drawer_handles1_UCSD
+UWR21	Handle 9	NICU	sink	NICU	Swab_was_taken_from_NICU_traveling_weigh_cart_drawer_handles2_UCSD
+MIW3	Handle 10	NICU	sink	NICU	Swab_was_taken_from_NICU_incubator_white_turn_handles_to_open_incubator_MB
+UIW23	Handle 11	NICU	sink	NICU	Swab_was_taken_from_NICU_incubator_white_turn_handles_to_open_incubator_UCSD
+MSS1	Handle 12	NICU	sink	NICU	Swab_was_taken_from_NICU_sink_handles_MB
+UII29	Incubator 1	NICU	sink	NICU	Swab_was_taken_from_NICU_incubator_inside_plastic_UCSD
+MII5	Incubator 2	NICU	sink	NICU	Swab_was_taken_from_NICU_incubator_inside_plastic_MB
+MIK12	Keyboard 1	NICU	sink	NICU	Swab_was_taken_from_NICU_incubator_computer_keyboard_MB
+MPK2	Keyboard 2	NICU	sink	NICU	Swab_was_taken_from_NICU_Pyxus_Med_machine_keyboard_MB
+UIK27	Keyboard 3	NICU	sink	NICU	Swab_was_taken_from_NICU_incubator_computer_keyboard_UCSD
+UPK18	Keyboard 4	NICU	sink	NICU	Swab_was_taken_from_NICU_Pyxus_Med_machine_keyboard_UCSD
+MBP17	Plastic 1	NICU	sink	NICU	Swab_was_taken_from_NICU_baby_open_bedside_plastic_exterior2_MB
+MBP4	Plastic 2	NICU	sink	NICU	Swab_was_taken_from_NICU_baby_open_bedside_plastic_exterior_MB
+MBT14	Screen 1	NICU	sink	NICU	Swab_was_taken_from_NICU_baby_open_bedside_touch_screen_on_vitals_monitoring_device_MB
+UBT30	Screen 2	NICU	sink	NICU	Swab_was_taken_from_NICU_baby_open_bedside_touch_screen_on_vitals_monitoring_device_UCSD
+TUFC13	Chair AZ 1	Office	sink	Office	Swab_sample_from_woman_chair_in_Tucson_office_room_13
+TUFC19	Chair AZ 2	Office	sink	Office	Swab_sample_from_woman_chair_in_Tucson_office_room_19
+TUFC22	Chair AZ 3	Office	sink	Office	Swab_sample_from_woman_chair_in_Tucson_office_room_22
+TUFC24	Chair AZ 4	Office	sink	Office	Swab_sample_from_woman_chair_in_Tucson_office_room_24
+TUFC4	Chair AZ 5	Office	sink	Office	Swab_sample_from_woman_chair_in_Tucson_office_room_4
+TUMC11	Chair AZ 6	Office	sink	Office	Swab_sample_from_man_chair_in_Tucson_office_room_11
+TUMC15	Chair AZ 7	Office	sink	Office	Swab_sample_from_man_chair_in_Tucson_office_room_15
+TUMC18	Chair AZ 8	Office	sink	Office	Swab_sample_from_man_chair_in_Tucson_office_room_18
+TUMC23	Chair AZ 9	Office	sink	Office	Swab_sample_from_man_chair_in_Tucson_office_room_23
+TUMC25	Chair AZ 10	Office	sink	Office	Swab_sample_from_man_chair_in_Tucson_office_room_25
+NYFC16	Chair NY 1	Office	sink	Office	Swab_sample_from_woman_chair_in_New_York_office_room_16
+NYFC22	Chair NY 2	Office	sink	Office	Swab_sample_from_woman_chair_in_New_York_office_room_22
+NYFC4	Chair NY 3	Office	sink	Office	Swab_sample_from_woman_chair_in_New_York_office_room_4
+NYFC7	Chair NY 4	Office	sink	Office	Swab_sample_from_woman_chair_in_New_York_office_room_7
+NYMC18	Chair NY 5	Office	sink	Office	Swab_sample_from_man_chair_in_New_York_office_room_18
+NYMC23	Chair NY 6	Office	sink	Office	Swab_sample_from_man_chair_in_New_York_office_room_23
+NYMC31	Chair NY 7	Office	sink	Office	Swab_sample_from_man_chair_in_New_York_office_room_31
+NYMC5	Chair NY 8	Office	sink	Office	Swab_sample_from_man_chair_in_New_York_office_room_5
+SFFC10	Chair SF 1	Office	sink	Office	Swab_sample_from_woman_chair_in_San_Francisco_office_room_10
+SFFC2	Chair SF 2	Office	sink	Office	Swab_sample_from_woman_chair_in_San_Francisco_office_room_2
+SFFC23	Chair SF 3	Office	sink	Office	Swab_sample_from_woman_chair_in_San_Francisco_office_room_23
+SFFC24	Chair SF 4	Office	sink	Office	Swab_sample_from_woman_chair_in_San_Francisco_office_room_24
+SFFC3	Chair SF 5	Office	sink	Office	Swab_sample_from_woman_chair_in_San_Francisco_office_room_3
+SFMC16	Chair SF 6	Office	sink	Office	Swab_sample_from_man_chair_in_San_Francisco_office_room_16
+SFMC28	Chair SF 7	Office	sink	Office	Swab_sample_from_man_chair_in_San_Francisco_office_room_28
+SFMC29	Chair SF 8	Office	sink	Office	Swab_sample_from_man_chair_in_San_Francisco_office_room_29
+SFMC5	Chair SF 9	Office	sink	Office	Swab_sample_from_man_chair_in_San_Francisco_office_room_5
+SFMC7	Chair SF 10	Office	sink	Office	Swab_sample_from_man_chair_in_San_Francisco_office_room_7
+TUFP24	Phone AZ 1	Office	sink	Office	Swab_sample_from_woman_phone_in_Tucson_office_room_24
+TUMP11	Phone AZ 2	Office	sink	Office	Swab_sample_from_man_phone_in_Tucson_office_room_11
+TUFP4	Phone AZ 3	Office	sink	Office	Swab_sample_from_woman_phone_in_Tucson_office_room_4
+TUFP22	Phone AZ 4	Office	sink	Office	Swab_sample_from_woman_phone_in_Tucson_office_room_22
+TUMP15	Phone AZ 5	Office	sink	Office	Swab_sample_from_man_phone_in_Tucson_office_room_15
+TUMP18	Phone AZ 6	Office	sink	Office	Swab_sample_from_man_phone_in_Tucson_office_room_18
+TUMP23	Phone AZ 7	Office	sink	Office	Swab_sample_from_man_phone_in_Tucson_office_room_23
+TUMP25	Phone AZ 8	Office	sink	Office	Swab_sample_from_man_phone_in_Tucson_office_room_25
+NYFP4	Phone NY 1	Office	sink	Office	Swab_sample_from_woman_phone_in_New_York_office_room_4
+NYMP18	Phone NY 2	Office	sink	Office	Swab_sample_from_man_phone_in_New_York_office_room_18
+NYFP22	Phone NY 3	Office	sink	Office	Swab_sample_from_woman_phone_in_New_York_office_room_22
+NYFP16	Phone NY 4	Office	sink	Office	Swab_sample_from_woman_phone_in_New_York_office_room_16
+NYFP7	Phone NY 5	Office	sink	Office	Swab_sample_from_woman_phone_in_New_York_office_room_7
+NYFP19	Phone NY 6	Office	sink	Office	Swab_sample_from_woman_phone_in_New_York_office_room_19
+NYMP23	Phone NY 7	Office	sink	Office	Swab_sample_from_man_phone_in_New_York_office_room_23
+NYMP28	Phone NY 8	Office	sink	Office	Swab_sample_from_man_phone_in_New_York_office_room_28
+NYMP31	Phone NY 9	Office	sink	Office	Swab_sample_from_man_phone_in_New_York_office_room_31
+NYMP5	Phone NY 10	Office	sink	Office	Swab_sample_from_man_phone_in_New_York_office_room_5
+SFFP3	Phone SF 1	Office	sink	Office	Swab_sample_from_woman_phone_in_San_Francisco_office_room_3
+SFMP16	Phone SF 2	Office	sink	Office	Swab_sample_from_man_phone_in_San_Francisco_office_room_16
+SFFP23	Phone SF 3	Office	sink	Office	Swab_sample_from_woman_phone_in_San_Francisco_office_room_23
+SFFP24	Phone SF 4	Office	sink	Office	Swab_sample_from_woman_phone_in_San_Francisco_office_room_24
+SFFP10	Phone SF 5	Office	sink	Office	Swab_sample_from_woman_phone_in_San_Francisco_office_room_10
+SFFP2	Phone SF 6	Office	sink	Office	Swab_sample_from_woman_phone_in_San_Francisco_office_room_2
+SFMP28	Phone SF 7	Office	sink	Office	Swab_sample_from_man_phone_in_San_Francisco_office_room_28
+SFMP29	Phone SF 8	Office	sink	Office	Swab_sample_from_man_phone_in_San_Francisco_office_room_29
+SFMP7	Phone SF 9	Office	sink	Office	Swab_sample_from_man_phone_in_San_Francisco_office_room_7
+F11Fcsp	Gut 1	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F11Fcsw	Gut 2	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F12Fcsp	Gut 3	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F12Fcsw	Gut 4	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F13Fcsw	Gut 5	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F14Fcsw	Gut 6	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F21Fcsp	Gut 7	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F21Fcsw	Gut 8	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F22Fcsp	Gut 9	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F22Fcsw	Gut 10	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F23Fcsw	Gut 11	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F24Fcsw	Gut 12	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F31Fcsp	Gut 13	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F31Fcsw	Gut 14	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F32Fcsp	Gut 15	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F32Fcsw	Gut 16	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F33Fcsw	Gut 17	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F34Fcsw	Gut 18	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M11Fcsp	Gut 19	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M11Fcsw	Gut 20	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M12Fcsp	Gut 21	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M12Fcsw	Gut 22	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M13Fcsw	Gut 23	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M14Fcsw	Gut 24	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M21Fcsp	Gut 25	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M21Fcsw	Gut 26	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M22Fcsp	Gut 27	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M22Fcsw	Gut 28	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M23Fcsw	Gut 29	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M24Fcsw	Gut 30	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M31Fcsp	Gut 31	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M31Fcsw	Gut 32	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M32Fcsp	Gut 33	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M32Fcsw	Gut 34	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M33Fcsw	Gut 35	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M41Fcsp	Gut 36	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M41Fcsw	Gut 37	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M42Fcsp	Gut 38	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M42Fcsw	Gut 39	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M43Fcsw	Gut 40	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M44Fcsw	Gut 41	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M53Fcsw	Gut 42	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M54Fcsw	Gut 43	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M63Fcsw	Gut 44	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M64Fcsw	Gut 45	Gut	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F11Mout	Mouth 1	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F12Mout	Mouth 2	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F21Mout	Mouth 3	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F22Mout	Mouth 4	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F31Mout	Mouth 5	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F32Mout	Mouth 6	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M11Mout	Mouth 7	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M12Mout	Mouth 8	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M21Mout	Mouth 9	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M22Mout	Mouth 10	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M31Mout	Mouth 11	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M32Mout	Mouth 12	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M41Mout	Mouth 13	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M42Mout	Mouth 14	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F11Tong	Tongue 1	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F12Tong	Tongue 2	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F13Tong	Tongue 3	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F14Tong	Tongue 4	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F21Tong	Tongue 5	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F22Tong	Tongue 6	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F23Tong	Tongue 7	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F24Tong	Tongue 8	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F31Tong	Tongue 9	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F32Tong	Tongue 10	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F33Tong	Tongue 11	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F34Tong	Tongue 12	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M11Tong	Tongue 13	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M12Tong	Tongue 14	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M13Tong	Tongue 15	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M14Tong	Tongue 16	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M21Tong	Tongue 17	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M22Tong	Tongue 18	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M23Tong	Tongue 19	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M24Tong	Tongue 20	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M31Tong	Tongue 21	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M32Tong	Tongue 22	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M33Tong	Tongue 23	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M34Tong	Tongue 24	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M41Tong	Tongue 25	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M42Tong	Tongue 26	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M43Tong	Tongue 27	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M44Tong	Tongue 28	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M53Tong	Tongue 29	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M54Tong	Tongue 30	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M63Tong	Tongue 31	Oral	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F11Frhd	Forehead 1	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F24Frhd	Forehead 2	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F32Frhd	Forehead 3	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M14Frhd	Forehead 4	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M23Frhd	Forehead 5	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M32Frhd	Forehead 6	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M43Frhd	Forehead 7	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M54Frhd	Forehead 8	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M63Frhd	Forehead 9	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F11Indl	L index 1	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F21Indl	L index 2	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F31Indl	L index 3	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F32Indl	L index 4	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M11Indl	L index 5	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M12Indl	L index 6	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M22Indl	L index 7	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M31Indl	L index 8	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M41Indl	L index 9	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F13Plml	L Palm 1	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F24Plml	L Palm 2	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F31Plml	L Palm 3	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M13Plml	L Palm 4	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M23Plml	L Palm 5	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M33Plml	L Palm 6	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M43Plml	L Palm 7	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M53Plml	L Palm 8	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M63Plml	L Palm 9	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F12Indr	R index 1	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F21Indr	R index 2	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F31Indr	R index 3	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F32Indr	R index 4	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M11Indr	R index 5	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M21Indr	R index 6	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M31Indr	R index 7	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M41Indr	R index 8	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M42Indr	R index 9	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F11Plmr	R palm 1	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F23Plmr	R palm 2	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+F32Plmr	R palm 3	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M11Plmr	R palm 4	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M23Plmr	R palm 5	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M33Plmr	R palm 6	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M43Plmr	R palm 7	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M53Plmr	R palm 8	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+M64Plmr	R palm 9	Skin	source	Bacterial_variation_in_human_body_habitats_across_space_and_time	NA
+BF1	Alfisol 1	Soil	source	88_Soils	NA
+CA2	Alfisol 2	Soil	source	88_Soils	NA
+CO2	Alfisol 3	Soil	source	88_Soils	NA
+DF3	Alfisol 4	Soil	source	88_Soils	NA
+HI4	Andisol 1	Soil	source	88_Soils	NA
+HJ2	Andisol 2	Soil	source	88_Soils	NA
+JT1	Aridisol 3	Soil	source	88_Soils	NA
+MD5	Aridisol 4	Soil	source	88_Soils	NA
+SF1	Aridisol 5	Soil	source	88_Soils	NA
+SV1	Aridisol 6	Soil	source	88_Soils	NA
+SV2	Aridisol 7	Soil	source	88_Soils	NA
+BP1	Entisol 1	Soil	source	88_Soils	NA
+SA1	Entisol 2	Soil	source	88_Soils	NA
+SA2	Entisol 3	Soil	source	88_Soils	NA
+SP2	Entisol 4	Soil	source	88_Soils	NA
+BZ1	Gelisol 1	Soil	source	88_Soils	NA
+TL3	Gelisol 2	Soil	source	88_Soils	NA
+CC1	Inceptisol 1	Soil	source	88_Soils	NA
+CF3	Inceptisol 2	Soil	source	88_Soils	NA
+HF2	Inceptisol 3	Soil	source	88_Soils	NA
+IE2	Inceptisol 4	Soil	source	88_Soils	NA
+LQ2	Inceptisol 5	Soil	source	88_Soils	NA
+MP2	Inceptisol 6	Soil	source	88_Soils	NA
+MT1	Inceptisol 7	Soil	source	88_Soils	NA
+PE1	Inceptisol 8	Soil	source	88_Soils	NA
+SB1	Inceptisol 9	Soil	source	88_Soils	NA
+CM1	Mollisol 1	Soil	source	88_Soils	NA
+SN1	Inceptisol 10	Soil	source	88_Soils	NA
+SN3	Inceptisol 11	Soil	source	88_Soils	NA
+SP1	Inceptisol 12	Soil	source	88_Soils	NA
+CO3	Mollisol 2	Soil	source	88_Soils	NA
+CR1	Mollisol 3	Soil	source	88_Soils	NA
+GB5	Mollisol 4	Soil	source	88_Soils	NA
+KP4	Mollisol 5	Soil	source	88_Soils	NA
+RT1	Mollisol 6	Soil	source	88_Soils	NA
+RT2	Mollisol 7	Soil	source	88_Soils	NA
+SK1	Mollisol 8	Soil	source	88_Soils	NA
+SK3	Mollisol 9	Soil	source	88_Soils	NA
+SR2	Mollisol 10	Soil	source	88_Soils	NA
+VC2	Mollisol 11	Soil	source	88_Soils	NA
+AR1	Oxisol 1	Soil	source	88_Soils	NA
+PE7	Oxisol 2	Soil	source	88_Soils	NA
+BB2	Spodosol 1	Soil	source	88_Soils	NA
+IT2	Spodosol 2	Soil	source	88_Soils	NA
+CL3	Ultisol 	Soil	source	88_Soils	NA
