@@ -23,9 +23,10 @@
 # load SourceTracker package
 envvars <- as.list(Sys.getenv())
 if(is.element('SOURCETRACKER_PATH', names(envvars))){
-    source(envvars[['SOURCETRACKER_PATH']])
+    sourcefile <- sprintf('%s/src/SourceTracker.r',envvars[['SOURCETRACKER_PATH']])
+    source(sourcefile)
 } else {
-    stop("Please add SOURCETRACKER_PATH environment variable pointing to the source file 'SourceTracker.r'")
+    stop("Please add SOURCETRACKER_PATH environment variable pointing to the SourceTracker top-level directory (containing 'sourcetracker_for_qiime.r')")
 }
 
 
