@@ -2,7 +2,7 @@ All files required to run SourceTracker in R are in sourcetracker-X.Y.Z.tar.gz. 
 
 In the top-level folder, example usage of SourceTracker software is in 'example.r'. The example allows you to run the analysis described in the paper using the OTU table and mapping file contained in the "data" folder. Documentation for all package functions is included in the source code file 'src/SourceTracker.r'.
 
-There is also a convenience wrapper, "sourcetracker_for_qiime.r", for QIIME users that allows you to run SourceTracker from the command line, rather than in R. This requires that you have the path to your SourceTracker parent directory (the directory containing 'sourcetracker_for_qiime.r') stored in the environment variable, "SOURCETRACKER_PATH". If you use the Bash shell, one way to do this permanently is to add "export SOURCETRACKER_PATH=/path/to/your/sourcetracker/directory/" to the end of the .bashrc or .bash_profile file in your home directory. This script requires a mapping file, and either an OTU table or a taxon table. The input files must be in QIIME format:
+There is also a convenience wrapper, "sourcetracker_for_qiime.r", for QIIME users that allows you to run SourceTracker from the command line, rather than in R. This requires that you have the path to your SourceTracker.r script stored in the environment variable, "SOURCETRACKER_PATH". One way to do this permanently is to add "export SOURCETRACKER_PATH=/path/to/your/SourceTracker.r" to the end of the .bashrc (Linux) or .bash_profile (Mac) file in your home directory. This script requires a mapping file, and either an OTU table or a taxon table. The input files must be in QIIME format:
 
 Mapping file: tab-delimited, first line contains the column headers, first column header is "#SampleID"
 OTU table: tab-delimited, first line is a comment starting with "#", second line contains the column headers, first column header is "#OTU ID".
@@ -11,22 +11,26 @@ Taxon table: tab-delimited, first line contains the column headers, first column
 Example usage, ">" precedes commands:
 
 To see a listing of command-line parameters:
->Rscript $SOURCETRACKER_PATH/sourcetracker_for_qiime.r -h 
+>Rscript sourcetracker_for_qiime.r -h
 
 Run sink predictions using QIIME taxon abundance file:
->Rscript $SOURCETRACKER_PATH/sourcetracker_for_qiime.r -t taxa.txt -m map.txt
+>Rscript sourcetracker_for_qiime.r -t taxa.txt -m map.txt
 
 Run leave-one-out source-sample predictions using QIIME taxon abundance file:
->Rscript $SOURCETRACKER_PATH/sourcetracker_for_qiime.r -t taxa.txt -m map.txt -s
+>R sourcetracker_for_qiime.r -t taxa.txt -m map.txt -s
 
 Run sink predictions using QIIME OTU table:
->Rscript $SOURCETRACKER_PATH/sourcetracker_for_qiime.r -i otutable.txt -m map.txt
+>R sourcetracker_for_qiime.r -i otutable.txt -m map.txt
 
 Run sink predictions using QIIME OTU table with 1000 burnins, 25 random restarts, and rarefaction depth of 100:
->Rscript $SOURCETRACKER_PATH/sourcetracker_for_qiime.r -i otutable.txt -m map.txt -b 1000 -n 25 -r 100
+>R sourcetracker_for_qiime.r -i otutable.txt -m map.txt -b 1000 -n 25 -r 100
 
 
 Change log:
+
+Version 0.9.6:
+ - Fixed bug when user provides only 1 source or 1 sink, and R's default behavior drops the empty dimension of the source/sink OTU matrix thus converting it to a vector and breaking subsequent matrix operations (http://radfordneal.wordpress.com/2008/08/20/design-flaws-in-r-2-%E2%80%94-dropped-dimensions/).
+
 Version 0.9.5:
  - Now expects SOURCETRACKER_PATH to point to the SourceTracker parent directory. This will allow sys admins to install SourceTracker in an arbitrary location, while the user does not need to know the location. The user can then run with: "Rscript $SOURCETRACKER_PATH/sourcetracker_for_qiime.r". 
 
