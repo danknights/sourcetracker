@@ -1,21 +1,21 @@
 # USAGE
 # get help:
-# time R --slave --vanilla --args -h < sourcetracker_for_qiime.r 
+# Rscript sourcetracker_for_qiime.r-h 
 #
 # run sink predictions using QIIME taxon abundance file:
-# time R --slave --vanilla --args -t taxa.txt -m map.txt < sourcetracker_for_qiime.r 
+# Rscript sourcetracker_for_qiime.r-t taxa.txt -m map.txt 
 #
 # run leave-one-out source-sample predictions using QIIME taxon abundance file:
-# time R --slave --vanilla --args -t taxa.txt -m map.txt -s < sourcetracker_for_qiime.r 
+# Rscript sourcetracker_for_qiime.r-t taxa.txt -m map.txt -s 
 #
 # run sink predictions using QIIME OTU table:
-# time R --slave --vanilla --args -i otutable.txt -m map.txt < sourcetracker_for_qiime.r 
+# Rscript sourcetracker_for_qiime.r-i otutable.txt -m map.txt 
 #
 # run sink predictions using QIIME OTU table with 1000 burnins, 25 random restarts, and rarefaction depth of 100:
-# time R --slave --vanilla --args -i otutable.txt -m map.txt -b 1000 -n 25 -r 100< sourcetracker_for_qiime.r 
+# Rscript sourcetracker_for_qiime.r-i otutable.txt -m map.txt -b 1000 -n 25 -r 100< sourcetracker_for_qiime.r 
 #
 # run sink predictions using QIIME taxon abundance file and and input file listing the sampleids to predict:
-# time R --slave --vanilla --args -t taxa.txt -m map.txt -f sampleid_file.txt < sourcetracker_for_qiime.r 
+# Rscript sourcetracker_for_qiime.r-t taxa.txt -m map.txt -f sampleid_file.txt 
 #
 # Note: you must add the path to your SourceTracker.r file to your path, e.g.:
 # echo "" >> ~/.bash_profile; echo "export SOURCETRACKER_PATH=$HOME/path/to/your/SourceTracker.r" >> ~/.bash_profile; source ~/.bash_profile
@@ -198,13 +198,13 @@ if(!is.null(resultsfile)){
     envs <- map$Env
 
     # train SourceTracker object on training data
-    st <- sourcetracker(otus[source.ix,], envs[source.ix], rarefaction_depth=train.rarefaction)
+    st <- sourcetracker(otus[source.ix,,drop=F], envs[source.ix], rarefaction_depth=train.rarefaction)
 
     # if tuning is requested, obtain alpha values by cross-validation
     if(tune.alphas.ntrials > 0){
         verbosity <- 0
         if(arglist[['-v']]) verbosity <- 2
-        tune.res <- tune.st(otus[source.ix,], envs[source.ix], ntrials=tune.alphas.ntrials,
+        tune.res <- tune.st(otus[source.ix,,drop=F], envs[source.ix], ntrials=tune.alphas.ntrials,
                             rarefaction_depth=rarefaction, verbosity=verbosity, beta=beta)
         alpha1 <- tune.res$best.alpha1
         alpha2 <- tune.res$best.alpha2
@@ -227,7 +227,7 @@ if(!is.null(resultsfile)){
         if(eval.fit.ntrials > tune.alphas.ntrials) {
             if(arglist[['-v']]) cat(sprintf('Evaluating fit at alpha1=%f, alpha2=%f with %d trials\n',
                                 alpha1, alpha2, eval.fit.ntrials))
-            results.to.plot <- eval.fit(otus[source.ix,], envs[source.ix],
+            results.to.plot <- eval.fit(otus[source.ix,,drop=F], envs[source.ix],
                                 ntrials=eval.fit.ntrials, rarefaction_depth=rarefaction,
                                 alpha1=alpha1, alpha2=alpha2, beta=beta, verbosity=verbosity-1)
             sink(sprintf('%s/eval.fit.txt',outdir))
@@ -248,7 +248,7 @@ if(!is.null(resultsfile)){
         filebase <- 'source_predictions'
     } else {
         # Estimate source proportions in test data
-        testdata <- otus[sink.ix,]
+        testdata <- otus[sink.ix,,drop=F]
         if(length(sink.ix)==1){
             testdata <- matrix(testdata,nrow=1)
             rownames(testdata) <- rownames(otus)[sink.ix]
