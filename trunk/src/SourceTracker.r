@@ -134,7 +134,7 @@
         ndraws <- nrestarts * ndraws.per.restart # total number of draws
         draws <- array(0,dim=c(ndraws, V, N))
         cat(sprintf('ndraws=%d, V=%d, T=%d, N=%d\n',ndraws, V, T, N))
-        if(full.results){
+        if(q){
             full.draws <- array(0,dim=c(ndraws, V, T, N))
         }
         for(i in (1:N)){
@@ -180,6 +180,12 @@
     res <- list(draws=draws, proportions=proportions,
                 proportions_sd=proportions_sd,
                 train.envs=rownames(sources), samplenames=samplenames)
+    dimnames(full.draws) <- list(
+        sprintf('draw%05d',1:dim(full.draws)[1]),
+        rownames(sources),
+        colnames(sources),
+        samplenames
+    )
     if(full.results) res$full.results <- full.draws
     class(res) <- "sourcetracker.fit"
     return(invisible(res))
