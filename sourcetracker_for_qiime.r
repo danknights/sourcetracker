@@ -41,6 +41,7 @@ helpstr <- c(
 "-f sampleid_file, file containing list of samples to predict. Useful for parallel processing (default None).",
 "-o outdir: output directory; default is '.'",
 "-s predict source samples using leave-one-out predictions (default: FALSE)",
+"--suppress_full_results suppress writing of full per-taxon predictions (default: FALSE)",
 "--alpha1 alpha1: Dirichlet hyperparameter for taxa/genes in known environments (default: 1e-3)",
 "--alpha2 alpha2: Dirichlet hyperparameter for taxa/genes in unknown environments (default: 1e-1)",
 "--beta beta: Dirichlet hyperparameter for mixture of environments (default: 1e-2)",
@@ -54,7 +55,7 @@ allowed.args <- list('-i'=NULL,'-t'=NULL,'-m'=NULL,'-n'=10,'-b'=100,'-r'=1000,
                      '--train_rarefaction'=1000,
                      '-o'='.', '-v'=FALSE, '-s'=FALSE, '-f'=NULL,'-R'=NULL,
                      '--alpha1'=1e-3, '--alpha2'=1e-1, '--beta'=1e-2, '--tune_alphas'=0, '--eval_fit'=0,
-                     '--color_ix'=NULL)
+                     '--color_ix'=NULL, "--suppress_full_results"=FALSE)
 
 # Parse command-line params
 # assumes that NO args are positional
@@ -244,7 +245,7 @@ if(!is.null(resultsfile)){
 
     if(sourceonly){
         # Estimate leave-one-out source proportions in training data 
-        results <- predict(st, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=FALSE)
+        results <- predict(st, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=!arglist[['--suppress_full_results']])
         filebase <- 'source_predictions'
     } else {
         # Estimate source proportions in test data
@@ -253,7 +254,7 @@ if(!is.null(resultsfile)){
             testdata <- matrix(testdata,nrow=1)
             rownames(testdata) <- rownames(otus)[sink.ix]
         }
-        results <- predict(st,testdata, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=FALSE)
+        results <- predict(st,testdata, rarefaction_depth=rarefaction, nrestarts=nrestarts, burnin=burnin, alpha1=alpha1, alpha2=alpha2, beta=beta, full=!arglist[['--suppress_full_results']])
         filebase <- 'sink_predictions'
     }
     # save full results object
@@ -270,6 +271,33 @@ sink(sprintf('%s/%s_stdev.txt', outdir, filebase))
 cat('SampleID\t')
 write.table(results$proportions_sd,quote=F,sep='\t')
 sink(NULL)
+
+if(!arglist[['--suppress_full_results']]){
+    # get average of full results across restarts
+    res.mean <- apply(results$full.results,c(2,3,4),mean)
+    sample.sums <- apply(results$full.results[1,,,],3,sum)
+    print(length(sample.sums))
+    print(dim(results$full.results))
+    
+    # create dir
+    subdir <- paste(outdir,'full_results',sep='/')
+    dir.create(subdir,showWarnings=FALSE, recursive=TRUE)
+    # write each env separate file
+    for(i in 1:length(results$train.envs)){
+        env.name <- results$train.envs[i]
+        filename <- sprintf('%s/%s_%s_contributions.txt', subdir, filebase, env.name)
+        print(filename)
+        print(outdir)
+        print(subdir)
+        print(filebase)
+        print(env.name)
+        sink(filename)
+        cat('SampleID\t')
+        env.mat <- sweep(t(res.mean[i,,]),1,sample.sums,'/')
+        write.table(env.mat,quote=F,sep='\t')
+        sink(NULL)
+    }
+}
 
 save.mapping.file(results, map,
         filename=sprintf('%s/map.txt',outdir),
