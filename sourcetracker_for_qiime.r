@@ -286,11 +286,6 @@ if(!arglist[['--suppress_full_results']]){
     for(i in 1:length(results$train.envs)){
         env.name <- results$train.envs[i]
         filename <- sprintf('%s/%s_%s_contributions.txt', subdir, filebase, env.name)
-        print(filename)
-        print(outdir)
-        print(subdir)
-        print(filebase)
-        print(env.name)
         sink(filename)
         cat('SampleID\t')
         env.mat <- sweep(t(res.mean[i,,]),1,sample.sums,'/')

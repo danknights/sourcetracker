@@ -28,6 +28,15 @@ Run sink predictions using QIIME OTU table with 1000 burnins, 25 random restarts
 
 Change log:
 
+Version 1.0:
+ - Fixed bug in leave-one-out predictions when suppressing full results; ported to github.
+
+Version 0.9.8:
+ - Fixed bug in leave-one-out predictions, removed extraneous output
+
+Version 0.9.7:
+ - Now outputs per-taxon or per-OTU source estimates for every sample
+
 Version 0.9.6:
  - Fixed bug when user provides only 1 source or 1 sink, and R's default behavior drops the empty dimension of the source/sink OTU matrix thus converting it to a vector and breaking subsequent matrix operations (http://radfordneal.wordpress.com/2008/08/20/design-flaws-in-r-2-%E2%80%94-dropped-dimensions/).
 
