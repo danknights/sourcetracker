@@ -127,7 +127,8 @@ if(!is.null(predictfile)){
 }
 
 # load mapping file
-map <- read.table(arglist[['-m']],sep='\t',comment='',head=T,row.names=1,check=FALSE)
+map <- read.table(arglist[['-m']],sep='\t',comment='',head=T,row.names=1,check=FALSE,colClasses='character')
+
 if(sum(colnames(map)=='Env')==0) stop("The mapping file must contain an 'Env' column naming the source environment for each sample.")
 if(sourceonly){
     # if no sourcesink column, use all samples for leave-one-out
@@ -156,15 +157,22 @@ if(!is.null(resultsfile)){
         otus <- read.table(arglist[['-t']],sep='\t',head=T,row.names=1,check=FALSE)
     }
     # drop "Consensus Lineage" column if present
-    otus <- as.matrix(t(otus[,!grepl('Consensus|Metadata',colnames(otus))]))
+    otus <- as.matrix(t(otus[,!grepl('Consensus|Metadata|taxonomy',colnames(otus),ignore=TRUE)]))
     
 
     # ensure map and data table contain the same samples in the same order
+    print(rownames(map))
+    print(rownames(otus))
     ix <- intersect(rownames(map), rownames(otus))
+    print(ix)
+    print(dim(map))
+    print(dim(otus))
+    print(length(ix))
     otus <- otus[ix,]
     map <- map[ix,]
 
     # ensure there are no "empty" samples
+    
     rs <- rowSums(otus)
     num.empties <- sum(rs == 0) 
     if(num.empties > 0){
@@ -276,8 +284,6 @@ if(!arglist[['--suppress_full_results']]){
     # get average of full results across restarts
     res.mean <- apply(results$full.results,c(2,3,4),mean)
     sample.sums <- apply(results$full.results[1,,,],3,sum)
-    print(length(sample.sums))
-    print(dim(results$full.results))
     
     # create dir
     subdir <- paste(outdir,'full_results',sep='/')
@@ -302,7 +308,7 @@ save.mapping.file(results, map,
 if(dim(results$draws)[2] > 1) {
     plot.types <- c('pie', 'bar', 'dist')
 } else plot.types <- c('pie', 'bar')
-envs <- map[rownames(results$proportions),'Env']
+envs <- as.factor(map[rownames(results$proportions),'Env'])
 labels = sprintf('%s_%s',envs, rownames(results$proportions))
 plotixs <- sort(as.numeric(envs),index=TRUE)$ix
 for(plot.type in plot.types){
