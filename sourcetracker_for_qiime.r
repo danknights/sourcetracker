@@ -161,13 +161,7 @@ if(!is.null(resultsfile)){
     
 
     # ensure map and data table contain the same samples in the same order
-    print(rownames(map))
-    print(rownames(otus))
     ix <- intersect(rownames(map), rownames(otus))
-    print(ix)
-    print(dim(map))
-    print(dim(otus))
-    print(length(ix))
     otus <- otus[ix,]
     map <- map[ix,]
 
