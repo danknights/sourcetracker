@@ -312,9 +312,10 @@
         # for each restart
         for(j in 1:nrestarts){
             if(verbosity>=1) cat('.')
+        	prev.warn <- options()$warn
             options(warn=-1)
             z <- sample(V,D,replace=TRUE) # random env assignments
-            options(warn=0)
+            options(warn=prev.warn)
 
             sources[V,] <- unknown.prior # prior counts of taxa in Unknown
             sources[V,] <- sources[V,] + alpha2 * D # add relative alpha prior counts
@@ -541,9 +542,10 @@
 
     for(i in 1:nrow(x)){
         if(sum(x[i,]) > maxdepth){
+        	prev.warn <- options()$warn
             options(warn=-1)
             s <- sample(nc, size=maxdepth, prob=x[i,], replace=T)
-            options(warn=0)
+            options(warn=prev.warn)
             x[i,] <- hist(s,breaks=seq(.5,nc+.5,1), plot=FALSE)$counts
         }
     }

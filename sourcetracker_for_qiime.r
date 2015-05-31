@@ -277,7 +277,7 @@ sink(NULL)
 if(!arglist[['--suppress_full_results']]){
     # get average of full results across restarts
     res.mean <- apply(results$full.results,c(2,3,4),mean)
-    sample.sums <- apply(results$full.results[1,,,],3,sum)
+    sample.sums <- apply(results$full.results[1,,,,drop=F],3,sum)
     
     # create dir
     subdir <- paste(outdir,'full_results',sep='/')
@@ -286,9 +286,12 @@ if(!arglist[['--suppress_full_results']]){
     for(i in 1:length(results$train.envs)){
         env.name <- results$train.envs[i]
         filename <- sprintf('%s/%s_%s_contributions.txt', subdir, filebase, env.name)
+        res.mean.i <- res.mean[i,,]
+		# handle the case where there is only one sink sample
+        if(is.null(dim(res.mean.i))) res.mean.i <- matrix(res.mean.i,ncol=1)
+        env.mat <- sweep(res.mean.i,1,sample.sums,'/')
         sink(filename)
         cat('SampleID\t')
-        env.mat <- sweep(t(res.mean[i,,]),1,sample.sums,'/')
         write.table(env.mat,quote=F,sep='\t')
         sink(NULL)
     }
