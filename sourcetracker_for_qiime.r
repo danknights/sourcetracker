@@ -200,6 +200,9 @@ if(!is.null(resultsfile)){
     }
     envs <- map$Env
 
+	if(length(source.ix) < 1) stop("No samples are identified as sources")
+	if(length(sink.ix) < 1 && !sourceonly) stop("No samples are identified as sinks")
+
     # train SourceTracker object on training data
     st <- sourcetracker(otus[source.ix,,drop=F], envs[source.ix], rarefaction_depth=train.rarefaction)
 
