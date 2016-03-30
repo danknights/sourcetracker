@@ -17,8 +17,8 @@
 # run sink predictions using QIIME taxon abundance file and and input file listing the sampleids to predict:
 # Rscript sourcetracker_for_qiime.r-t taxa.txt -m map.txt -f sampleid_file.txt 
 #
-# Note: you must add the path to your SourceTracker.r file to your path, e.g.:
-# echo "" >> ~/.bash_profile; echo "export SOURCETRACKER_PATH=$HOME/path/to/your/SourceTracker.r" >> ~/.bash_profile; source ~/.bash_profile
+# Note: you must add the path to your SourceTracker top-level directory to your path, e.g.:
+# echo "" >> ~/.bash_profile; echo "export SOURCETRACKER_PATH=$HOME/path/to/your/sourcetracker/repository/folder" >> ~/.bash_profile; source ~/.bash_profile
 
 # load SourceTracker package
 envvars <- as.list(Sys.getenv())
