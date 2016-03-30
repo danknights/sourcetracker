@@ -25,20 +25,29 @@ Taxon table: tab-delimited, first line contains the column headers, first column
 Example usage, ">" precedes commands:
 
 To see a listing of command-line parameters:
->Rscript sourcetracker_for_qiime.r -h
+```bash
+Rscript sourcetracker_for_qiime.r -h
+```
 
+```bash
 Run sink predictions using QIIME taxon abundance file:
 >Rscript sourcetracker_for_qiime.r -t taxa.txt -m map.txt
+```
 
+```bash
 Run leave-one-out source-sample predictions using QIIME taxon abundance file:
 >R sourcetracker_for_qiime.r -t taxa.txt -m map.txt -s
+```
 
+```bash
 Run sink predictions using QIIME OTU table:
 >R sourcetracker_for_qiime.r -i otutable.txt -m map.txt
+```
 
+```bash
 Run sink predictions using QIIME OTU table with 1000 burnins, 25 random restarts, and rarefaction depth of 100:
 >R sourcetracker_for_qiime.r -i otutable.txt -m map.txt -b 1000 -n 25 -r 100
-
+```
 
 Change log:
 
