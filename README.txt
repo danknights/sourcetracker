@@ -2,7 +2,21 @@ All files required to run SourceTracker in R are in sourcetracker-X.Y.Z.tar.gz. 
 
 In the top-level folder, example usage of SourceTracker software is in 'example.r'. The example allows you to run the analysis described in the paper using the OTU table and mapping file contained in the "data" folder. Documentation for all package functions is included in the source code file 'src/SourceTracker.r'.
 
-There is also a convenience wrapper, "sourcetracker_for_qiime.r", for QIIME users that allows you to run SourceTracker from the command line, rather than in R. This requires that you have the path to your top-level SourceTracker repository folder script stored in the environment variable, "SOURCETRACKER_PATH". One way to do this permanently is to add "export SOURCETRACKER_PATH=/path/to/your/sourcetracker/repository/folder" to the end of the .bashrc (Linux) or .bash_profile (Mac) file in your home directory. This script requires a mapping file, and either an OTU table or a taxon table. The input files must be in QIIME format:
+There is also a convenience wrapper, "sourcetracker_for_qiime.r", for QIIME users that allows you to run SourceTracker from the command line, rather than in R. This requires that you have the path to your top-level SourceTracker repository folder script stored in the environment variable, "SOURCETRACKER_PATH". One way to do this permanently is to add "export SOURCETRACKER_PATH=/path/to/your/sourcetracker/repository/folder" to the end of the .bash_profile or .Renviron file in your home directory. You can do this with one of these commands:
+
+For most systems:
+```bash
+echo >> $HOME/.bash_profile
+echo "SOURCETRACKER_PATH=$PWD" >> $HOME/.bash_profile
+```
+
+If that fails:
+```bash
+echo >> $HOME/.Renviron
+echo "SOURCETRACKER_PATH=$PWD" >> $HOME/.Renviron
+```
+
+This script requires a mapping file, and either an OTU table or a taxon table. The input files must be in QIIME format:
 
 Mapping file: tab-delimited, first line contains the column headers, first column header is "#SampleID"
 OTU table: tab-delimited, first line is a comment starting with "#", second line contains the column headers, first column header is "#OTU ID".
