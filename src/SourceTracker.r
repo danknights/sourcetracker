@@ -139,7 +139,7 @@
         }
         for(i in (1:N)){
             stobj.i <- sourcetracker(stobj$train[-i,], envs[-i], rarefaction_depth=rarefaction_depth)
-            sources <- stobj$sources
+            sources <- stobj.i$sources
             V.i <- nrow(sources) # number of source envs (might be missing one if there's only one sample from this env)
             draws.i <- run.gibbs(sources, stobj$train[i,], V.i, T, 1,
                 burnin=burnin, nrestarts=nrestarts, 
